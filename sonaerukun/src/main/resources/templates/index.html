@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>防災グッズ計算アプリ</title>
+</head>
+<body>
+    <header>
+        <h1>ソナエルくん</h1>
+        <p>家族構成と年齢から、必要な装備を提案します</p>
+    </header>
+
+    <main>
+        <form action="/calculate" method="post">
+    <section id="input-form">
+        <h2>家族構成を入力</h2>
+        <label>家族の人数：<input type="number" name="familyCount" value="1"></label><br>
+        
+        <label>用意したい日数：
+            <select name="days">
+                <option value="1">1日分</option>
+                <option value="3" selected>3日分</option>
+                <option value="7">7日分</option>
+            </select>
+        </label><br>
+        
+        <label>区分：
+            <select name="category">
+                <option value="child">こども</option>
+                <option value="adult">大人</option>
+                <option value="senior">高齢者</option>
+            </select>
+        </label><br>
+    </section>
+
+            <section id="family-input">
+                <h2>女性の人数を入力</h2>
+                <label>女性の人数：
+                    <input type="number" id="femaleCount" name="femaleCount" min="0" value="0" oninput="toggleHygieneArea()">
+                </label><br>
+            </section>
+
+            <section id="hygiene-area" style="display: none;">
+                <h2>衛生用品の調整</h2>
+                <label>生理用ナプキンの使用目安：
+                    <select name="napkinLevel">
+                        <option value="low">少なめ</option>
+                        <option value="standard" selected>標準</option>
+                        <option value="high">多め</option>
+                    </select>
+                </label>
+            </section>
+
+            <button type="submit">計算する</button>
+        </form>
+
+        <script>
+        function toggleHygieneArea() {
+            const femaleCount = document.getElementById('femaleCount').value;
+            const hygieneArea = document.getElementById('hygiene-area');
+            if (femaleCount > 0) {
+                hygieneArea.style.display = 'block';
+            } else {
+                hygieneArea.style.display = 'none';
+            }
+        }
+        </script>
+
+        <section id="result-area">
+            <h2>必要な防災グッズ</h2>
+            <div id="result-list" th:text="${result}">
+                ここに結果が表示されます
+            </div>
+        </section>
+    </main>
+</body>
+</html>
