@@ -22,14 +22,22 @@ public class Homecontroller {
 @PostMapping("/calculate")
 public String calculate(
         @RequestParam("familyCount") int familyCount,
+        @RequestParam("infantCount") int infantCount,   // ★追加
+        @RequestParam("seniorCount") int seniorCount,   // ★追加
         @RequestParam("days") int days,
-        @RequestParam("category") String category,
+        @RequestParam(value = "category", required = false) String category, // ★任意に
         @RequestParam("femaleCount") int femaleCount,
         @RequestParam(value = "napkinLevel", required = false, defaultValue = "standard") String napkinLevel,
         Model model) {
-    String result = sonaeruLogic.calculate(familyCount, days); 
     
-    model.addAttribute("result", result);
+    // ロジックへ渡す引数に乳幼児と高齢者を追加
+    SonaeruLogic.PreparednessResult result = sonaeruLogic.calculate(
+            familyCount, infantCount, seniorCount, days, femaleCount, napkinLevel); 
+    
+    model.addAttribute("rankA", result.rankA);
+    model.addAttribute("rankB", result.rankB);
+    model.addAttribute("rankC",result.rankC);
+    model.addAttribute("storageInfo", result.storageInfo);
     return "index";
 }
 }

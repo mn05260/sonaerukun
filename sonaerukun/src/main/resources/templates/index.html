@@ -2,76 +2,245 @@
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>防災グッズ計算アプリ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>防災グッズ計算アプリ | ソナエルくん</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+   <style>
+        :root {
+            --primary-color: #ff9800;
+            --secondary-color: #2196f3;
+            --bg-color: #f5f7f9;
+            --card-bg: #ffffff;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        main { max-width: 600px; margin: 0 auto; }
+
+        section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        /* --- ここから「2列レイアウト」用の追加 --- */
+        .item-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 横に2つ並べる */
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .grid-item {
+            background: #f8f9fa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .grid-item input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        /* 0個の項目を隠す（これ便利です！） */
+        .hidden-item { display: none; }
+
+        .rank-a { border-top: 8px solid #d9534f; }
+        .rank-b { border-top: 8px solid #0275d8; }
+        .rank-c { border-top: 8px solid #28a745; background-color: #fafffa; }
+        @media (max-width: 480px) {
+            .item-grid { grid-template-columns: 1fr; } /* スマホでは1列 */
+        }
+        #toggle-rank-c {
+            background: white;
+            color: #28a745;
+            border: 1.5px solid #28a745;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: auto; /* ボタンが横いっぱいに広がらないように追加 */
+            padding: 5px 15px;
+        }
+        #toggle-rank-c:hover {
+            background: #28a745;
+            color: white;
+        }
+
+        /* ↓ ここから「買い物ボタン」用のCSSを追記 ↓ */
+        .grid-item span {
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
+        /* マウスを乗せた時の見た目（「押せる」とわからせる） */
+        .grid-item span:hover {
+            background-color: #fff3e0; /* 薄いオレンジ */
+            color: #ff9800;
+            text-decoration: underline;
+        }
+
+        /* アイテム名の横に虫眼鏡アイコンを出す（自動） */
+        .grid-item span::after {
+            content: " 🔍";
+            font-size: 0.8rem;
+            opacity: 0.6;
+        }
+    </style>
 </head>
+   
 <body>
     <header>
-        <h1>ソナエルくん</h1>
-        <p>家族構成と年齢から、必要な装備を提案します</p>
+        <h1>📦 ソナエルくん</h1>
+        <p>あなたと家族を守るための備えを計算します</p>
     </header>
 
     <main>
         <form action="/calculate" method="post">
-    <section id="input-form">
-        <h2>家族構成を入力</h2>
-        <label>家族の人数：<input type="number" name="familyCount" value="1"></label><br>
-        
-        <label>用意したい日数：
-            <select name="days">
-                <option value="1">1日分</option>
-                <option value="3" selected>3日分</option>
-                <option value="7">7日分</option>
-            </select>
-        </label><br>
-        
-        <label>区分：
-            <select name="category">
-                <option value="child">こども</option>
-                <option value="adult">大人</option>
-                <option value="senior">高齢者</option>
-            </select>
-        </label><br>
-    </section>
+           <section>
+                <h2>基本設定</h2>
+                <div class="form-group">
+                    <label>🏠 家族の合計人数</label>
+                    <input type="number" name="familyCount" value="1" min="1">
+                </div>
 
-            <section id="family-input">
-                <h2>女性の人数を入力</h2>
-                <label>女性の人数：
+                <div class="family-grid">
+                    <div class="form-group">
+                        <label>👶 乳幼児 (0-5歳)</label>
+                        <input type="number" name="infantCount" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>🧓 高齢者 (65歳〜)</label>
+                        <input type="number" name="seniorCount" value="0" min="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>⏳ 備蓄したい日数</label>
+                    <select name="days">
+                        <option value="1">1日分（最低限）</option>
+                        <option value="3" selected>3日分（標準）</option>
+                        <option value="7">7日分（推奨）</option>
+                    </select>
+                </div>
+
+                </section>
+
+            <section>
+                <h2>個別設定</h2>
+                <div class="form-group">
+                    <label>👩‍🦰 女性の人数</label>
                     <input type="number" id="femaleCount" name="femaleCount" min="0" value="0" oninput="toggleHygieneArea()">
-                </label><br>
-            </section>
+                </div>
 
-            <section id="hygiene-area" style="display: none;">
-                <h2>衛生用品の調整</h2>
-                <label>生理用ナプキンの使用目安：
+                <div id="hygiene-area" style="display: none; margin-top: 15px; padding: 15px; background: #f0f8ff; border-radius: 10px;">
+                    <label>✨ 生理用品の準備量</label>
                     <select name="napkinLevel">
                         <option value="low">少なめ</option>
                         <option value="standard" selected>標準</option>
                         <option value="high">多め</option>
                     </select>
-                </label>
+                </div>
             </section>
 
-            <button type="submit">計算する</button>
+            <button type="submit">結果を表示する</button>
         </form>
 
-        <script>
+        <hr style="margin: 40px 0; border: 0; border-top: 1px solid #ddd;">
+<<div th:if="${rankA != null or rankB != null or rankC != null}">
+    <section class="result-card rank-a">
+        <h3 style="color: #d9534f;">🏃 ランクA：すぐに持ち出す</h3>
+        <div class="item-grid">
+            <div th:each="item : ${#strings.arraySplit(rankA, ',')}" 
+                 th:classappend="${item.contains(': 0')} ? 'hidden-item' : 'grid-item'">
+                <input type="checkbox">
+                <span th:text="${item.trim()}" onclick="searchItem(this.innerText)"></span>
+            </div>
+        </div>
+    </section>
+<section style="background: #fff9c4; border-left: 5px solid #fbc02d; padding: 15px; margin-bottom: 20px;">
+    <h4 style="margin: 0 0 10px 0; color: #f57f17;">📏 収納シミュレーター</h4>
+    <p style="margin: 0; font-weight: bold; font-size: 1.1rem;" th:text="${storageInfo}"></p>
+    <p style="margin: 5px 0 0 0; font-size: 0.8rem; color: #666;">
+        ※一般的なサイズに基づく目安です。クローゼットや玄関横のスペースを確保しましょう！
+    </p>
+</section>
+    <section class="result-card rank-b">
+        <h3 style="color: #0275d8;">🏠 ランクB：自宅で備蓄する</h3>
+        <div class="item-grid">
+            <div th:each="item : ${#strings.arraySplit(rankB, ',')}" 
+                 th:classappend="${item.contains(': 0')} ? 'hidden-item' : 'grid-item'">
+                <input type="checkbox">
+                <span th:text="${item.trim()}" onclick="searchItem(this.innerText)"></span>
+            </div>
+        </div>
+    </section>
+
+    <section class="result-card rank-c">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="color: #28a745; margin: 0;">📦 ランクC：あると便利なもの</h3>
+            <button type="button" id="toggle-rank-c" onclick="toggleRankC()">表示する</button>
+        </div>
+        
+        <div id="rank-c-content" style="display: none; margin-top: 15px; border-top: 1px dashed #28a745; padding-top: 15px;">
+            <p style="font-size: 0.8rem; color: #666; margin-bottom: 10px;">復旧期や長引く避難生活を支える、心のゆとりセットです。</p>
+            <div class="item-grid">
+                <div th:each="item : ${#strings.arraySplit(rankC, ',')}" 
+                     th:classappend="${item.contains(': 0')} ? 'hidden-item' : 'grid-item'">
+                    <input type="checkbox">
+                    <span th:text="${item.trim()}" onclick="searchItem(this.innerText)"></span>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+        
+    </main>
+
+    <script>
         function toggleHygieneArea() {
             const femaleCount = document.getElementById('femaleCount').value;
             const hygieneArea = document.getElementById('hygiene-area');
-            if (femaleCount > 0) {
-                hygieneArea.style.display = 'block';
-            } else {
-                hygieneArea.style.display = 'none';
-            }
+            hygieneArea.style.display = (femaleCount > 0) ? 'block' : 'none';
         }
-        </script>
+        function toggleRankC() {
+    const content = document.getElementById('rank-c-content');
+    const btn = document.getElementById('toggle-rank-c');
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        btn.innerText = '閉じる';
+        // 開いた時に少しスクロールして見やすくする
+        content.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+        content.style.display = 'none';
+        btn.innerText = '表示する';
+    }
+}
+function searchItem(itemName){
+    constquery = encodeURIComponent(itemName.trim());
+    const url = 'https://www.amazon.co.jp/s?k=${query}';
+    window.open(url, '_blank');
 
-        <section id="result-area">
-            <h2>必要な防災グッズ</h2>
-            <div id="result-list" th:text="${result}">
-                ここに結果が表示されます
-            </div>
-        </section>
-    </main>
+}
+function searchItem(itemName) {
+    // 「水: 3L」などの文字列から「水」だけを取り出す
+    const cleanName = itemName.split(':')[0].trim();
+    const url = `https://www.amazon.co.jp/s?k=${encodeURIComponent(cleanName)} 防災`;
+    window.open(url, '_blank');
+}
+    </script>
 </body>
 </html>
