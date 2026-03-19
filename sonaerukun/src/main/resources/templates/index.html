@@ -5,147 +5,171 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>防災グッズ計算アプリ | ソナエルくん</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
-   <style>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-database-compat.js"></script>
+
+    <style>
         :root {
-            --primary-color: #ff9800;
-            --secondary-color: #2196f3;
-            --bg-color: #f5f7f9;
+            --primary-color: #2d5a27; /* 深い安心感のある緑 */
+            --accent-color: #e67e22;  /* 灯火のような温かいオレンジ */
+            --bg-color: #f8fafc;      /* 清潔感のあるグレーホワイト */
             --card-bg: #ffffff;
-            --text-color: #333;
+            --text-color: #334155;
+            --light-green: #ecf3eb;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
         }
 
         body {
             font-family: 'Noto Sans JP', sans-serif;
             background-color: var(--bg-color);
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            color: var(--text-color);
+            line-height: 1.6;
         }
 
-        main { max-width: 600px; margin: 0 auto; }
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #2d5a27, #4a7c44);
+            color: white;
+            border-radius: 0 0 30px 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        header h1 { margin: 0; font-size: 2rem; letter-spacing: 2px; }
+        header p { opacity: 0.9; margin: 8px 0 0 0; font-size: 0.9rem; }
+
+        main { max-width: 650px; margin: -20px auto 40px; padding: 0 15px; }
+
+        /* タブデザイン */
+        .tab-container {
+            display: flex;
+            background: white;
+            padding: 6px;
+            border-radius: 16px;
+            gap: 5px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+        }
+        .tab-btn {
+            flex: 1; padding: 14px; border: none; border-radius: 12px;
+            background: transparent; color: #64748b; cursor: pointer;
+            font-weight: bold; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tab-btn.active {
+            background: var(--primary-color); color: white;
+        }
 
         section {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            background: var(--card-bg); border-radius: 24px;
+            padding: 24px; margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.02);
         }
 
-        /* --- ここから「2列レイアウト」用の追加 --- */
-        .item-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr; /* 横に2つ並べる */
-            gap: 10px;
-            margin: 15px 0;
-        }
+        h2 { font-size: 1.25rem; margin-top: 0; color: var(--primary-color); display: flex; align-items: center; gap: 10px; }
 
+        /* フォーム要素 */
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; color: #475569; font-size: 0.95rem; }
+        
+        input, select, textarea {
+            width: 100%; padding: 14px; border: 2px solid #e2e8f0;
+            border-radius: 12px; font-size: 1rem; box-sizing: border-box;
+            transition: all 0.2s; background: #fdfdfd;
+        }
+        input:focus { border-color: var(--primary-color); outline: none; background: white; }
+
+        button[type="submit"] {
+            width: 100%; padding: 18px; background: var(--accent-color);
+            color: white; border: none; border-radius: 16px;
+            font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            box-shadow: 0 10px 15px -3px rgba(230, 126, 34, 0.3);
+            transition: transform 0.2s;
+        }
+        button[type="submit"]:active { transform: scale(0.98); }
+
+        /* 結果表示カード */
+        .item-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
         .grid-item {
-            background: #f8f9fa;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            font-size: 0.9rem;
+            background: var(--light-green); border-radius: 12px;
+            padding: 14px; display: flex; align-items: center; gap: 10px;
+            font-size: 0.9rem; font-weight: 500;
+        }
+        .grid-item span { cursor: pointer; color: var(--primary-color); }
+        
+        .rank-a { border-left: 8px solid #ef4444; }
+        .rank-b { border-left: 8px solid #3b82f6; }
+        .rank-c { border-left: 8px solid #10b981; }
+
+        /* 期限管理テーブルのモダン化 */
+        .manage-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+        .manage-table th { padding: 10px; text-align: left; font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; }
+        .manage-table td { background: #f8fafc; padding: 10px; border: 1px solid #f1f5f9; }
+        .manage-table td:first-child { border-radius: 12px 0 0 12px; }
+        .manage-table td:last-child { border-radius: 0 12px 12px 0; }
+        .manage-table input { border: none; background: transparent; padding: 5px; }
+
+        /* 同期セクション */
+        .sync-section {
+            background: #f1f5f9; border: 2px dashed #cbd5e1;
+            text-align: center; padding: 24px; border-radius: 24px; margin-top: 30px;
+        }
+        .sync-btn {
+            background: var(--primary-color); color: white; border: none;
+            padding: 14px 30px; border-radius: 30px;
+            font-weight: bold; cursor: pointer; margin-top: 15px;
         }
 
-        .grid-item input[type="checkbox"] {
-            margin-right: 8px;
-            cursor: pointer;
-        }
-
-        /* 0個の項目を隠す（これ便利です！） */
         .hidden-item { display: none; }
-
-        .rank-a { border-top: 8px solid #d9534f; }
-        .rank-b { border-top: 8px solid #0275d8; }
-        .rank-c { border-top: 8px solid #28a745; background-color: #fafffa; }
-        @media (max-width: 480px) {
-            .item-grid { grid-template-columns: 1fr; } /* スマホでは1列 */
-        }
-        #toggle-rank-c {
-            background: white;
-            color: #28a745;
-            border: 1.5px solid #28a745;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: auto; /* ボタンが横いっぱいに広がらないように追加 */
-            padding: 5px 15px;
-        }
-        #toggle-rank-c:hover {
-            background: #28a745;
-            color: white;
-        }
-
-        /* ↓ ここから「買い物ボタン」用のCSSを追記 ↓ */
-        .grid-item span {
-            cursor: pointer;
-            transition: all 0.2s;
-            padding: 2px 5px;
-            border-radius: 4px;
-        }
-
-        /* マウスを乗せた時の見た目（「押せる」とわからせる） */
-        .grid-item span:hover {
-            background-color: #fff3e0; /* 薄いオレンジ */
-            color: #ff9800;
-            text-decoration: underline;
-        }
-
-        /* アイテム名の横に虫眼鏡アイコンを出す（自動） */
-        .grid-item span::after {
-            content: " 🔍";
-            font-size: 0.8rem;
-            opacity: 0.6;
-        }
+        @media (max-width: 480px) { .item-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
-   
 <body>
-    <header>
-        <h1>📦 ソナエルくん</h1>
-        <p>あなたと家族を守るための備えを計算します</p>
-    </header>
 
-    <main>
+<header>
+    <h1>📦 ソナエルくん</h1>
+    <p>家族の安心を、手のひらに。</p>
+</header>
+
+<main>
+    <div class="tab-container">
+        <button id="btn-calc" class="tab-btn active" onclick="switchTab('calc')">備えを計算</button>
+        <button id="btn-manage" class="tab-btn" onclick="switchTab('manage')">期限・共有</button>
+    </div>
+
+    <div id="calc-content">
         <form action="/calculate" method="post">
-           <section>
-                <h2>基本設定</h2>
+            <section>
+                <h2>🏠 家族構成の入力</h2>
                 <div class="form-group">
-                    <label>🏠 家族の合計人数</label>
-                    <input type="number" name="familyCount" value="1" min="1">
+                    <label>家族の合計人数</label>
+                    <input type="number" name="familyCount" th:value="${param.familyCount ?: 1}" min="1">
                 </div>
-
-                <div class="family-grid">
-                    <div class="form-group">
-                        <label>👶 乳幼児 (0-5歳)</label>
-                        <input type="number" name="infantCount" value="0" min="0">
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>👶 乳幼児</label>
+                        <input type="number" name="infantCount" th:value="${param.infantCount ?: 0}" min="0">
                     </div>
-                    <div class="form-group">
-                        <label>🧓 高齢者 (65歳〜)</label>
-                        <input type="number" name="seniorCount" value="0" min="0">
+                    <div class="form-group" style="flex: 1;">
+                        <label>🧓 高齢者</label>
+                        <input type="number" name="seniorCount" th:value="${param.seniorCount ?: 0}" min="0">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>⏳ 備蓄したい日数</label>
+                    <label>⏳ 備蓄日数</label>
                     <select name="days">
-                        <option value="1">1日分（最低限）</option>
-                        <option value="3" selected>3日分（標準）</option>
-                        <option value="7">7日分（推奨）</option>
+                        <option value="1" th:selected="${param.days == '1'}">1日分（最短）</option>
+                        <option value="3" th:selected="${param.days == '3' or param.days == null}">3日分（標準）</option>
+                        <option value="7" th:selected="${param.days == '7'}">7日分（推奨）</option>
                     </select>
                 </div>
-
-                </section>
-
-            <section>
-                <h2>個別設定</h2>
                 <div class="form-group">
                     <label>👩‍🦰 女性の人数</label>
-                    <input type="number" id="femaleCount" name="femaleCount" min="0" value="0" oninput="toggleHygieneArea()">
+                    <input type="number" id="femaleCount" name="femaleCount" th:value="${param.femaleCount ?: 0}" min="0" oninput="toggleHygieneArea()">
                 </div>
-
-                <div id="hygiene-area" style="display: none; margin-top: 15px; padding: 15px; background: #f0f8ff; border-radius: 10px;">
+                <div id="hygiene-area" th:style="${(param.femaleCount != null and param.femaleCount[0] != '0') ? 'display: block;' : 'display: none;'}">
                     <label>✨ 生理用品の準備量</label>
                     <select name="napkinLevel">
                         <option value="low">少なめ</option>
@@ -153,94 +177,237 @@
                         <option value="high">多め</option>
                     </select>
                 </div>
+                <button type="submit">計算してリストを作る</button>
             </section>
-
-            <button type="submit">結果を表示する</button>
         </form>
 
-        <hr style="margin: 40px 0; border: 0; border-top: 1px solid #ddd;">
-<<div th:if="${rankA != null or rankB != null or rankC != null}">
-    <section class="result-card rank-a">
-        <h3 style="color: #d9534f;">🏃 ランクA：すぐに持ち出す</h3>
-        <div class="item-grid">
-            <div th:each="item : ${#strings.arraySplit(rankA, ',')}" 
-                 th:classappend="${item.contains(': 0')} ? 'hidden-item' : 'grid-item'">
-                <input type="checkbox">
-                <span th:text="${item.trim()}" onclick="searchItem(this.innerText)"></span>
-            </div>
-        </div>
-    </section>
-<section style="background: #fff9c4; border-left: 5px solid #fbc02d; padding: 15px; margin-bottom: 20px;">
-    <h4 style="margin: 0 0 10px 0; color: #f57f17;">📏 収納シミュレーター</h4>
-    <p style="margin: 0; font-weight: bold; font-size: 1.1rem;" th:text="${storageInfo}"></p>
-    <p style="margin: 5px 0 0 0; font-size: 0.8rem; color: #666;">
-        ※一般的なサイズに基づく目安です。クローゼットや玄関横のスペースを確保しましょう！
-    </p>
-</section>
-    <section class="result-card rank-b">
-        <h3 style="color: #0275d8;">🏠 ランクB：自宅で備蓄する</h3>
-        <div class="item-grid">
-            <div th:each="item : ${#strings.arraySplit(rankB, ',')}" 
-                 th:classappend="${item.contains(': 0')} ? 'hidden-item' : 'grid-item'">
-                <input type="checkbox">
-                <span th:text="${item.trim()}" onclick="searchItem(this.innerText)"></span>
-            </div>
-        </div>
-    </section>
-
-    <section class="result-card rank-c">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="color: #28a745; margin: 0;">📦 ランクC：あると便利なもの</h3>
-            <button type="button" id="toggle-rank-c" onclick="toggleRankC()">表示する</button>
-        </div>
-        
-        <div id="rank-c-content" style="display: none; margin-top: 15px; border-top: 1px dashed #28a745; padding-top: 15px;">
-            <p style="font-size: 0.8rem; color: #666; margin-bottom: 10px;">復旧期や長引く避難生活を支える、心のゆとりセットです。</p>
-            <div class="item-grid">
-                <div th:each="item : ${#strings.arraySplit(rankC, ',')}" 
-                     th:classappend="${item.contains(': 0')} ? 'hidden-item' : 'grid-item'">
-                    <input type="checkbox">
-                    <span th:text="${item.trim()}" onclick="searchItem(this.innerText)"></span>
+        <div th:if="${rankA != null}" style="margin-top: 10px;">
+            <section class="rank-a">
+                <h2>🏃 ランクA：即座に持ち出す</h2>
+                <div class="item-grid">
+                    <div th:each="item : ${#strings.arraySplit(rankA, ',')}" th:classappend="${item.contains(': 0')} ? 'hidden-item' : 'grid-item'">
+                        <input type="checkbox"> <span th:text="${item.trim()}" onclick="searchItem(this.innerText)"></span>
+                    </div>
                 </div>
-            </div>
+            </section>
+
+            <section class="rank-b" th:if="${rankB != null}">
+                <h2>🏠 ランクB：自宅で備える</h2>
+                <div class="item-grid">
+                    <div th:each="item : ${#strings.arraySplit(rankB, ',')}" th:classappend="${item.contains(': 0')} ? 'hidden-item' : 'grid-item'">
+                        <input type="checkbox"> <span th:text="${item.trim()}" onclick="searchItem(this.innerText)"></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="rank-c" th:if="${rankC != null}">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>🔋 ランクC：日常で備える</h2>
+                    <button type="button" id="toggle-rank-c" onclick="toggleRankC()" style="background: var(--light-green); border: none; border-radius: 8px; padding: 8px 15px; cursor: pointer; color: var(--primary-color); font-weight: bold;">表示</button>
+                </div>
+                <div id="rank-c-content" class="item-grid" style="display: none;">
+                    <div th:each="item : ${#strings.arraySplit(rankC, ',')}" th:classappend="${item.contains(': 0')} ? 'hidden-item' : 'grid-item'">
+                        <input type="checkbox"> <span th:text="${item.trim()}" onclick="searchItem(this.innerText)"></span>
+                    </div>
+                </div>
+            </section>
         </div>
-    </section>
-</div>
-        
-    </main>
+    </div>
 
-    <script>
-        function toggleHygieneArea() {
-            const femaleCount = document.getElementById('femaleCount').value;
-            const hygieneArea = document.getElementById('hygiene-area');
-            hygieneArea.style.display = (femaleCount > 0) ? 'block' : 'none';
-        }
-        function toggleRankC() {
-    const content = document.getElementById('rank-c-content');
-    const btn = document.getElementById('toggle-rank-c');
-    
-    if (content.style.display === 'none') {
-        content.style.display = 'block';
-        btn.innerText = '閉じる';
-        // 開いた時に少しスクロールして見やすくする
-        content.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    } else {
-        content.style.display = 'none';
-        btn.innerText = '表示する';
+    <div id="manage-content" style="display: none;">
+        <section>
+            <h2>📍 避難・連絡メモ</h2>
+            <div class="form-group">
+                <label>🏫 第一避難所</label>
+                <input type="text" id="evac-place" placeholder="例：〇〇小学校グラウンド" onchange="saveAllData()">
+            </div>
+            <div class="form-group">
+                <label>🤝 集合ルール</label>
+                <textarea id="family-rule" placeholder="例：夕方17時に正門前で待ち合わせ" onchange="saveAllData()" style="min-height: 80px;"></textarea>
+            </div>
+            <div class="form-group">
+                <label>📞 緊急連絡先</label>
+                <input type="tel" id="emergency-tel" placeholder="例：090-xxxx-xxxx（父）" onchange="saveAllData()">
+            </div>
+        </section>
+
+       <section>
+    <h2>🍞 備蓄品の期限管理</h2>
+    <table class="manage-table">
+        <thead>
+            <tr><th style="width: 60%;">アイテム名</th><th>賞味期限</th></tr>
+        </thead>
+        <tbody id="expiry-list-body">
+            </tbody>
+    </table>
+    <p style="font-size: 0.8rem; color: #94a3b8; text-align: center;">入力すると自動で新しい行が増えます</p>
+</section>
+
+        <div class="sync-section">
+            <h3>🔗 家族とリアルタイム共有</h3>
+            <p style="font-size: 0.85rem; color: #64748b;">合言葉を決めて、家族全員のスマホを同期しましょう。</p>
+            <input type="text" id="sync-keyword" placeholder="家族共通の合言葉" style="text-align: center; margin-top: 10px;">
+            <button type="button" class="sync-btn" onclick="startSync()">同期を開始する</button>
+        </div>
+    </div>
+</main>
+
+<script>
+    // --- Firebase設定 (あなたのプロジェクト情報を保持) ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyA1MU0XeeE1CxUP2dg-qeqBk2zOSHeph6-hg",
+        authDomain: "sonaerukun-0526.firebaseapp.com",
+        projectId: "sonaerukun-0526",
+        storageBucket: "sonaerukun-0526.firebasestorage.app",
+        messagingSenderId: "134983842372",
+        appId: "1:134983842372:web:f620291243b74e33c31a11",
+        databaseURL: "https://sonaerukun-0526-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    let currentKeyword = "";
+
+    function switchTab(tabName) {
+        document.getElementById('calc-content').style.display = (tabName === 'calc') ? 'block' : 'none';
+        document.getElementById('manage-content').style.display = (tabName === 'manage') ? 'block' : 'none';
+        document.getElementById('btn-calc').classList.toggle('active', tabName === 'calc');
+        document.getElementById('btn-manage').classList.toggle('active', tabName === 'manage');
     }
-}
-function searchItem(itemName){
-    constquery = encodeURIComponent(itemName.trim());
-    const url = 'https://www.amazon.co.jp/s?k=${query}';
-    window.open(url, '_blank');
 
+    function toggleHygieneArea() {
+        const count = document.getElementById('femaleCount').value;
+        const area = document.getElementById('hygiene-area');
+        if(area) area.style.display = (count > 0) ? 'block' : 'none';
+    }
+
+    function toggleRankC() {
+        const content = document.getElementById('rank-c-content');
+        const btn = document.getElementById('toggle-rank-c');
+        const isHidden = content.style.display === 'none';
+        content.style.display = isHidden ? 'grid' : 'none';
+        btn.innerText = isHidden ? '閉じる' : '表示';
+    }
+
+    function searchItem(itemName) {
+        const cleanName = itemName.split(':')[0].trim();
+        window.open(`https://www.amazon.co.jp/s?k=${encodeURIComponent(cleanName)} 防災`, '_blank');
+    }
+
+    // --- 保存・同期処理 ---
+    function saveAllData() {
+        const names = document.querySelectorAll('.expiry-name');
+        const dates = document.querySelectorAll('.expiry-date');
+        const items = Array.from(names).map((el, i) => ({ name: el.value, date: dates[i].value }));
+
+        const memo = {
+            place: document.getElementById('evac-place').value,
+            rule: document.getElementById('family-rule').value,
+            tel: document.getElementById('emergency-tel').value
+        };
+
+        const allData = { items, memo };
+        localStorage.setItem('sonaerukun_v3_data', JSON.stringify(allData));
+
+        if (currentKeyword) {
+            database.ref('users/' + currentKeyword).set(allData);
+        }
+    }
+
+    function startSync() {
+        const keyword = document.getElementById('sync-keyword').value.trim();
+        if (!keyword) return alert("合言葉を入力してください");
+        currentKeyword = keyword;
+        localStorage.setItem('sonaerukun_keyword', keyword);
+        
+        database.ref('users/' + keyword).once('value').then((snapshot) => {
+            if (snapshot.exists()) {
+                reflectDataToUI(snapshot.val());
+                alert("家族のデータと同期しました！");
+            } else {
+                saveAllData();
+                alert("新しいグループを作成しました！");
+            }
+            observeData();
+        });
+    }
+
+    function observeData() {
+        if (!currentKeyword) return;
+        database.ref('users/' + currentKeyword).on('value', (snapshot) => {
+            if (snapshot.exists()) reflectDataToUI(snapshot.val());
+        });
+    }
+
+    function reflectDataToUI(data) {
+        if (data.items) {
+            const names = document.querySelectorAll('.expiry-name');
+            const dates = document.querySelectorAll('.expiry-date');
+            data.items.forEach((item, i) => {
+                if(names[i]) names[i].value = item.name || '';
+                if(dates[i]) dates[i].value = item.date || '';
+            });
+        }
+        if (data.memo) {
+            document.getElementById('evac-place').value = data.memo.place || '';
+            document.getElementById('family-rule').value = data.memo.rule || '';
+            document.getElementById('emergency-tel').value = data.memo.tel || '';
+        }
+    }
+
+   window.onload = function() {
+    const local = JSON.parse(localStorage.getItem('sonaerukun_v3_data') || '{}');
+    
+    // 期限管理データの再現
+    const tbody = document.getElementById('expiry-list-body');
+    tbody.innerHTML = ''; // 一旦クリア
+    
+    if (local.items && local.items.some(item => item.name !== '')) {
+        local.items.forEach(item => {
+            if (item.name !== '') addExpiryRow(item.name, item.date);
+        });
+    }
+    
+    // 常に最後には空の行を1つ置いておく
+    addExpiryRow();
+
+    // メモ部分の再現
+    if (local.memo) {
+        document.getElementById('evac-place').value = local.memo.place || '';
+        document.getElementById('family-rule').value = local.memo.rule || '';
+        document.getElementById('emergency-tel').value = local.memo.tel || '';
+    }
+
+    // Firebase同期の再開
+    const savedKeyword = localStorage.getItem('sonaerukun_keyword');
+    if (savedKeyword) {
+        document.getElementById('sync-keyword').value = savedKeyword;
+        currentKeyword = savedKeyword;
+        observeData();
+    }
+};
+    // 新しい行を追加する関数
+function addExpiryRow(name = '', date = '') {
+    const tbody = document.getElementById('expiry-list-body');
+    const tr = document.createElement('tr');
+    
+    tr.innerHTML = `
+        <td><input type="text" class="expiry-name" placeholder="アイテム名" value="${name}" oninput="handleRowInput(this)"></td>
+        <td><input type="month" class="expiry-date" value="${date}" onchange="saveAllData()"></td>
+    `;
+    tbody.appendChild(tr);
 }
-function searchItem(itemName) {
-    // 「水: 3L」などの文字列から「水」だけを取り出す
-    const cleanName = itemName.split(':')[0].trim();
-    const url = `https://www.amazon.co.jp/s?k=${encodeURIComponent(cleanName)} 防災`;
-    window.open(url, '_blank');
+
+// 入力を検知して、最後の行なら新しい行を足す
+function handleRowInput(input) {
+    const rows = document.querySelectorAll('#expiry-list-body tr');
+    const lastRowInput = rows[rows.length - 1].querySelector('.expiry-name');
+    
+    if (input === lastRowInput && input.value !== '') {
+        addExpiryRow();
+    }
+    saveAllData(); // 入力のたびに保存
 }
-    </script>
+</script>
 </body>
 </html>
