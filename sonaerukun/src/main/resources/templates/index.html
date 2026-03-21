@@ -168,10 +168,7 @@
                 <div class="form-group">
                     <label>家族の合計人数</label>
                     
-                <input type="number" name="familyCount" 
-       th:value="${param.familyCount ?: 1}" 
-       min="1" max="100" 
-       title="100人以内で入力してください">
+               <input type="number" name="familyCount" th:value="${param.familyCount ?: 1}" min="1" max="100" oninput="limitInput(this)">
                 </div>
                 <div style="display: flex; gap: 15px;">
                     <div class="form-group" style="flex: 1;">
@@ -203,7 +200,10 @@
                         <option value="high">多め</option>
                     </select>
                 </div>
-                <button type="submit">計算してリストを作る</button>
+                <p id="error-message" style="color: #ef4444; font-size: 0.85rem; font-weight: bold; text-align: center; margin-bottom: 10px; display: none;">
+    ⚠️ 全ての項目に数字を入力してください
+</p>
+<button type="submit" id="submit-btn" onclick="return validateAll()">計算してリストを作る</button>
             </section>
         </form>
 
@@ -465,15 +465,68 @@
             observeData();
         }
     };
-    function limitInput(input) {
-    if (input.value > 100) {
-        alert("100人以内で入力してくださいね！");
-        input.value = 100;
+    // 数字入力を監視して、異常な値や空欄をチェックする
+function limitInput(input) {
+    input.style.borderColor = "#e2e8f0"; // 色をリセット
+
+    if (input.value === "") {
+        input.style.borderColor = "#ef4444"; // 空なら赤く
+    } else {
+        // 100を超えたら100、0未満なら0に強制補正
+        if (parseFloat(input.value) > 100) {
+            alert("100人以内で入力してくださいね！");
+            input.value = 100;
+        } else if (parseFloat(input.value) < 0) {
+            input.value = 0;
+        }
     }
-    if (input.value < 0) {
-        input.value = 0;
+
+    // ★重要：入力のたびにボタンの状態をチェックする
+    checkAllInputs();
+}
+
+// 全ての入力欄をチェックして、ボタンを無効化するか決める
+function checkAllInputs() {
+    const inputs = document.querySelectorAll('input[type="number"]');
+    const submitBtn = document.getElementById('submit-btn');
+    const errorMsg = document.getElementById('error-message'); // メッセージ要素を取得
+    let hasError = false;
+
+    inputs.forEach(input => {
+        if (input.value === "" || isNaN(input.value)) {
+            hasError = true;
+        }
+    });
+
+    if (hasError) {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = "0.5";
+        submitBtn.style.cursor = "not-allowed";
+        errorMsg.style.display = "block"; // エラーメッセージを表示！
+    } else {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = "1";
+        submitBtn.style.cursor = "pointer";
+        errorMsg.style.display = "none";  // 全て入力されたら消す！
     }
 }
+
+// ボタンが押された時の最終チェック
+function validateAll() {
+    const inputs = document.querySelectorAll('input[type="number"]');
+    for (let input of inputs) {
+        if (input.value === "") {
+            alert("未入力の項目があります。数字を入力してください。");
+            input.focus();
+            input.style.borderColor = "#ef4444";
+            return false; 
+        }
+    }
+    return true; 
+}
+
+// ページを読み込んだ瞬間にもチェックを走らせる
+window.addEventListener('DOMContentLoaded', checkAllInputs);
 </script>
 </body>
 </html>
