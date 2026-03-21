@@ -93,10 +93,32 @@
         /* 結果表示カード */
         .item-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
         .grid-item {
-            background: var(--light-green); border-radius: 12px;
-            padding: 14px; display: flex; align-items: center; gap: 10px;
-            font-size: 0.9rem; font-weight: 500;
-        }
+    background: var(--light-green); 
+    border-radius: 12px;
+    padding: 14px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; /* ✨ これで中身を中央寄せにする */
+    gap: 10px;
+    font-size: 0.95rem; /* 少し大きく */
+    font-weight: bold;  /* ✨ 太文字にする */
+    text-align: center; /* テキスト自体も中央寄せ */
+    transition: transform 0.2s;
+}
+
+/* チェックボックスと文字の間隔を整える */
+.grid-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    cursor: pointer;
+}
+
+/* マウスを乗せた時に少し浮き上がる演出（プロっぽさ！） */
+.grid-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
         .grid-item span { cursor: pointer; color: var(--primary-color); }
         
         .rank-a { border-left: 8px solid #ef4444; }
@@ -145,16 +167,20 @@
                 <h2>🏠 家族構成の入力</h2>
                 <div class="form-group">
                     <label>家族の合計人数</label>
-                    <input type="number" name="familyCount" th:value="${param.familyCount ?: 1}" min="1">
+                    
+                <input type="number" name="familyCount" 
+       th:value="${param.familyCount ?: 1}" 
+       min="1" max="100" 
+       title="100人以内で入力してください">
                 </div>
                 <div style="display: flex; gap: 15px;">
                     <div class="form-group" style="flex: 1;">
                         <label>👶 乳幼児</label>
-                        <input type="number" name="infantCount" th:value="${param.infantCount ?: 0}" min="0">
+                       <input type="number" name="infantCount" th:value="${param.infantCount ?: 0}" min="0" max="100" oninput="limitInput(this)">
                     </div>
                     <div class="form-group" style="flex: 1;">
                         <label>🧓 高齢者</label>
-                        <input type="number" name="seniorCount" th:value="${param.seniorCount ?: 0}" min="0">
+                        <input type="number" name="seniorCount" th:value="${param.seniorCount ?: 0}" min="0" max="100" oninput="limitInput(this)">
                     </div>
                 </div>
                 <div class="form-group">
@@ -167,7 +193,7 @@
                 </div>
                 <div class="form-group">
                     <label>👩‍🦰 女性の人数</label>
-                    <input type="number" id="femaleCount" name="femaleCount" th:value="${param.femaleCount ?: 0}" min="0" oninput="toggleHygieneArea()">
+                    <input type="number" id="femaleCount" name="femaleCount" th:value="${param.femaleCount ?: 0}" min="0" max="100" oninput="toggleHygieneArea(); limitInput(this);">
                 </div>
                 <div id="hygiene-area" th:style="${(param.femaleCount != null and param.femaleCount[0] != '0') ? 'display: block;' : 'display: none;'}">
                     <label>✨ 生理用品の準備量</label>
@@ -233,14 +259,21 @@
 
        <section>
     <h2>🍞 備蓄品の期限管理</h2>
+    <div style="background: var(--light-green); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <input type="text" id="new-item-name" placeholder="アイテム名（例：カンパン）" style="flex: 2; min-width: 150px;">
+            <input type="month" id="new-item-date" style="flex: 1; min-width: 130px;">
+            <button type="button" onclick="addItem()" style="background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold;">追加</button>
+        </div>
+    </div>
+
     <table class="manage-table">
         <thead>
-            <tr><th style="width: 60%;">アイテム名</th><th>賞味期限</th></tr>
+            <tr><th style="width: 50%;">アイテム名</th><th style="width: 35%;">賞味期限</th><th style="width: 15%;"></th></tr>
         </thead>
         <tbody id="expiry-list-body">
             </tbody>
     </table>
-    <p style="font-size: 0.8rem; color: #94a3b8; text-align: center;">入力すると自動で新しい行が増えます</p>
 </section>
 
         <div class="sync-section">
@@ -253,7 +286,7 @@
 </main>
 
 <script>
-    // --- Firebase設定 (あなたのプロジェクト情報を保持) ---
+    // --- Firebase設定 (既存のものをそのまま使用) ---
     const firebaseConfig = {
         apiKey: "AIzaSyA1MU0XeeE1CxUP2dg-qeqBk2zOSHeph6-hg",
         authDomain: "sonaerukun-0526.firebaseapp.com",
@@ -268,6 +301,7 @@
     const database = firebase.database();
     let currentKeyword = "";
 
+    // タブ切り替え
     function switchTab(tabName) {
         document.getElementById('calc-content').style.display = (tabName === 'calc') ? 'block' : 'none';
         document.getElementById('manage-content').style.display = (tabName === 'manage') ? 'block' : 'none';
@@ -275,12 +309,14 @@
         document.getElementById('btn-manage').classList.toggle('active', tabName === 'manage');
     }
 
+    // 生理用品エリアの表示切り替え
     function toggleHygieneArea() {
         const count = document.getElementById('femaleCount').value;
         const area = document.getElementById('hygiene-area');
         if(area) area.style.display = (count > 0) ? 'block' : 'none';
     }
 
+    // ランクCの表示切り替え
     function toggleRankC() {
         const content = document.getElementById('rank-c-content');
         const btn = document.getElementById('toggle-rank-c');
@@ -289,16 +325,61 @@
         btn.innerText = isHidden ? '閉じる' : '表示';
     }
 
+    // Amazon検索
     function searchItem(itemName) {
         const cleanName = itemName.split(':')[0].trim();
         window.open(`https://www.amazon.co.jp/s?k=${encodeURIComponent(cleanName)} 防災`, '_blank');
+    }
+
+    // --- 【新機能】アイテムを追加する ---
+    function addItem() {
+        const nameInput = document.getElementById('new-item-name');
+        const dateInput = document.getElementById('new-item-date');
+
+        const name = nameInput.value.trim();
+        const date = dateInput.value;
+
+        if (!name) return alert("アイテム名を入力してください");
+
+        // テーブルに行を追加
+        createRow(name, date);
+
+        // 入力欄を空にする
+        nameInput.value = '';
+        dateInput.value = '';
+
+        // 保存
+        saveAllData();
+    }
+
+    // テーブルに1行表示を作る関数
+    function createRow(name, date) {
+        const tbody = document.getElementById('expiry-list-body');
+        const tr = document.createElement('tr');
+        
+        tr.innerHTML = `
+            <td><input type="text" class="expiry-name" value="${name}" onchange="saveAllData()"></td>
+            <td><input type="month" class="expiry-date" value="${date}" onchange="saveAllData()"></td>
+            <td style="text-align: center;">
+                <button type="button" onclick="this.parentElement.parentElement.remove(); saveAllData();" 
+                    style="background: #fee2e2; color: #ef4444; border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 0.8rem;">
+                    削除
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
     }
 
     // --- 保存・同期処理 ---
     function saveAllData() {
         const names = document.querySelectorAll('.expiry-name');
         const dates = document.querySelectorAll('.expiry-date');
-        const items = Array.from(names).map((el, i) => ({ name: el.value, date: dates[i].value }));
+        
+        // アイテムリストを配列にまとめる
+        const items = Array.from(names).map((el, i) => ({ 
+            name: el.value, 
+            date: dates[i].value 
+        })).filter(item => item.name !== ""); // 空のデータは保存しない
 
         const memo = {
             place: document.getElementById('evac-place').value,
@@ -314,6 +395,7 @@
         }
     }
 
+    // Firebase同期開始
     function startSync() {
         const keyword = document.getElementById('sync-keyword').value.trim();
         if (!keyword) return alert("合言葉を入力してください");
@@ -332,6 +414,7 @@
         });
     }
 
+    // Firebaseのデータ監視
     function observeData() {
         if (!currentKeyword) return;
         database.ref('users/' + currentKeyword).on('value', (snapshot) => {
@@ -339,13 +422,14 @@
         });
     }
 
+    // 取得したデータを画面に反映
     function reflectDataToUI(data) {
+        const tbody = document.getElementById('expiry-list-body');
+        
         if (data.items) {
-            const names = document.querySelectorAll('.expiry-name');
-            const dates = document.querySelectorAll('.expiry-date');
-            data.items.forEach((item, i) => {
-                if(names[i]) names[i].value = item.name || '';
-                if(dates[i]) dates[i].value = item.date || '';
+            tbody.innerHTML = ''; // 一旦クリアして再描画
+            data.items.forEach(item => {
+                createRow(item.name, item.date);
             });
         }
         if (data.memo) {
@@ -355,58 +439,40 @@
         }
     }
 
-   window.onload = function() {
-    const local = JSON.parse(localStorage.getItem('sonaerukun_v3_data') || '{}');
-    
-    // 期限管理データの再現
-    const tbody = document.getElementById('expiry-list-body');
-    tbody.innerHTML = ''; // 一旦クリア
-    
-    if (local.items && local.items.some(item => item.name !== '')) {
-        local.items.forEach(item => {
-            if (item.name !== '') addExpiryRow(item.name, item.date);
-        });
-    }
-    
-    // 常に最後には空の行を1つ置いておく
-    addExpiryRow();
+    // ページ読み込み時の処理
+    window.onload = function() {
+        const local = JSON.parse(localStorage.getItem('sonaerukun_v3_data') || '{}');
+        
+        // 保存データの復元
+        if (local.items) {
+            const tbody = document.getElementById('expiry-list-body');
+            tbody.innerHTML = ''; 
+            local.items.forEach(item => {
+                if (item.name) createRow(item.name, item.date);
+            });
+        }
 
-    // メモ部分の再現
-    if (local.memo) {
-        document.getElementById('evac-place').value = local.memo.place || '';
-        document.getElementById('family-rule').value = local.memo.rule || '';
-        document.getElementById('emergency-tel').value = local.memo.tel || '';
-    }
+        if (local.memo) {
+            document.getElementById('evac-place').value = local.memo.place || '';
+            document.getElementById('family-rule').value = local.memo.rule || '';
+            document.getElementById('emergency-tel').value = local.memo.tel || '';
+        }
 
-    // Firebase同期の再開
-    const savedKeyword = localStorage.getItem('sonaerukun_keyword');
-    if (savedKeyword) {
-        document.getElementById('sync-keyword').value = savedKeyword;
-        currentKeyword = savedKeyword;
-        observeData();
+        const savedKeyword = localStorage.getItem('sonaerukun_keyword');
+        if (savedKeyword) {
+            document.getElementById('sync-keyword').value = savedKeyword;
+            currentKeyword = savedKeyword;
+            observeData();
+        }
+    };
+    function limitInput(input) {
+    if (input.value > 100) {
+        alert("100人以内で入力してくださいね！");
+        input.value = 100;
     }
-};
-    // 新しい行を追加する関数
-function addExpiryRow(name = '', date = '') {
-    const tbody = document.getElementById('expiry-list-body');
-    const tr = document.createElement('tr');
-    
-    tr.innerHTML = `
-        <td><input type="text" class="expiry-name" placeholder="アイテム名" value="${name}" oninput="handleRowInput(this)"></td>
-        <td><input type="month" class="expiry-date" value="${date}" onchange="saveAllData()"></td>
-    `;
-    tbody.appendChild(tr);
-}
-
-// 入力を検知して、最後の行なら新しい行を足す
-function handleRowInput(input) {
-    const rows = document.querySelectorAll('#expiry-list-body tr');
-    const lastRowInput = rows[rows.length - 1].querySelector('.expiry-name');
-    
-    if (input === lastRowInput && input.value !== '') {
-        addExpiryRow();
+    if (input.value < 0) {
+        input.value = 0;
     }
-    saveAllData(); // 入力のたびに保存
 }
 </script>
 </body>
