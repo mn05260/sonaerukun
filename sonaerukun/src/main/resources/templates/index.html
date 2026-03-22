@@ -146,6 +146,57 @@
 
         .hidden-item { display: none; }
         @media (max-width: 480px) { .item-grid { grid-template-columns: 1fr; } }
+   /* trにクラスがついた時、中のtdすべての背景を変える */
+/* --- 警告感マシマシ設定 --- */
+
+/* 期限切れ・1ヶ月未満：強い赤と太字 */
+.status-danger td { 
+    background-color: #fecaca !important; 
+    border-top: 2px solid #ef4444 !important;
+    border-bottom: 2px solid #ef4444 !important;
+}
+.status-danger input { 
+    color: #b91c1c !important; 
+    font-weight: 900 !important; 
+}
+/* 期限切れに警告アイコンを擬似的に出す（オプション） */
+
+/* 3ヶ月未満：注意を促すオレンジ */
+.status-warning td { 
+    background-color: #fed7aa !important; 
+    border-top: 2px solid #f97316 !important;
+    border-bottom: 2px solid #f97316 !important;
+}
+.status-warning input { 
+    color: #c2410c !important; 
+    font-weight: bold; 
+}
+
+/* 安全：落ち着いた緑（枠線なし） */
+.status-safe td { 
+    background-color: #bbf7d0 !important; 
+    color: #166534 !important; 
+}
+/* 危険（期限切れ） */
+.status-danger td:first-child::before { 
+    content: "❌ "; 
+}
+
+/* 注意（3ヶ月未満） */
+.status-warning td:first-child::before { 
+    content: "⚠️ "; 
+}
+
+/* 安全 */
+.status-safe td:first-child::before { 
+    content: "✅ "; 
+}
+/* 入力欄の調整（共通） */
+.manage-table input {
+    background: transparent !important;
+    border: none;
+    outline: none;
+}
     </style>
 </head>
 <body>
@@ -302,7 +353,7 @@
 </main>
 
 <script>
-    // --- Firebase設定 (既存のものをそのまま使用) ---
+    // --- Firebase設定 ---
     const firebaseConfig = {
         apiKey: "AIzaSyA1MU0XeeE1CxUP2dg-qeqBk2zOSHeph6-hg",
         authDomain: "sonaerukun-0526.firebaseapp.com",
@@ -347,35 +398,29 @@
         window.open(`https://www.amazon.co.jp/s?k=${encodeURIComponent(cleanName)} 防災`, '_blank');
     }
 
-    // --- 【新機能】アイテムを追加する ---
+    // アイテムを追加する
     function addItem() {
         const nameInput = document.getElementById('new-item-name');
         const dateInput = document.getElementById('new-item-date');
-
         const name = nameInput.value.trim();
         const date = dateInput.value;
-
         if (!name) return alert("アイテム名を入力してください");
 
-        // テーブルに行を追加
         createRow(name, date);
-
-        // 入力欄を空にする
+        sortItemsByDate(); 
         nameInput.value = '';
         dateInput.value = '';
-
-        // 保存
         saveAllData();
     }
 
-    // テーブルに1行表示を作る関数
+    // --- ★色分けロジック付きのcreateRow ---
     function createRow(name, date) {
         const tbody = document.getElementById('expiry-list-body');
         const tr = document.createElement('tr');
         
         tr.innerHTML = `
             <td><input type="text" class="expiry-name" value="${name}" onchange="saveAllData()"></td>
-            <td><input type="month" class="expiry-date" value="${date}" onchange="saveAllData()"></td>
+            <td><input type="month" class="expiry-date" value="${date}" onchange="saveAllData(); updateRowColor(this.parentElement.parentElement); sortItemsByDate();"></td>
             <td style="text-align: center;">
                 <button type="button" onclick="this.parentElement.parentElement.remove(); saveAllData();" 
                     style="background: #fee2e2; color: #ef4444; border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 0.8rem;">
@@ -384,18 +429,49 @@
             </td>
         `;
         tbody.appendChild(tr);
+        updateRowColor(tr); // 追加時に色を判定
     }
 
-    // --- 保存・同期処理 ---
+    // --- ★色を塗る関数本体 ---
+    function updateRowColor(tr) {
+    const dateInput = tr.querySelector('.expiry-date');
+    let statusLabel = tr.querySelector('.status-label');
+
+    if (!statusLabel) {
+        statusLabel = document.createElement('span');
+        statusLabel.className = 'status-label';
+        tr.children[0].appendChild(statusLabel);
+    }
+
+    if (!dateInput.value) return;
+
+    const expiryDate = new Date(dateInput.value + "-01");
+    const today = new Date();
+    const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const diffMonths = (expiryDate.getFullYear() - currentMonth.getFullYear()) * 12 + (expiryDate.getMonth() - currentMonth.getMonth());
+
+    tr.classList.remove('status-danger', 'status-warning', 'status-safe');
+
+    if (diffMonths < 1) {
+        tr.classList.add('status-danger');
+        statusLabel.textContent = "（期限切れ）";
+    } else if (diffMonths < 3) {
+        tr.classList.add('status-warning');
+        statusLabel.textContent = "（注意）";
+    } else {
+        tr.classList.add('status-safe');
+        statusLabel.textContent = "（安全）";
+    }
+}
+
+    // 保存・同期処理
     function saveAllData() {
         const names = document.querySelectorAll('.expiry-name');
         const dates = document.querySelectorAll('.expiry-date');
-        
-        // アイテムリストを配列にまとめる
         const items = Array.from(names).map((el, i) => ({ 
             name: el.value, 
             date: dates[i].value 
-        })).filter(item => item.name !== ""); // 空のデータは保存しない
+        })).filter(item => item.name !== "");
 
         const memo = {
             place: document.getElementById('evac-place').value,
@@ -405,13 +481,11 @@
 
         const allData = { items, memo };
         localStorage.setItem('sonaerukun_v3_data', JSON.stringify(allData));
-
         if (currentKeyword) {
             database.ref('users/' + currentKeyword).set(allData);
         }
     }
 
-    // Firebase同期開始
     function startSync() {
         const keyword = document.getElementById('sync-keyword').value.trim();
         if (!keyword) return alert("合言葉を入力してください");
@@ -430,7 +504,6 @@
         });
     }
 
-    // Firebaseのデータ監視
     function observeData() {
         if (!currentKeyword) return;
         database.ref('users/' + currentKeyword).on('value', (snapshot) => {
@@ -441,9 +514,8 @@
     // 取得したデータを画面に反映
     function reflectDataToUI(data) {
         const tbody = document.getElementById('expiry-list-body');
-        
         if (data.items) {
-            tbody.innerHTML = ''; // 一旦クリアして再描画
+            tbody.innerHTML = ''; 
             data.items.forEach(item => {
                 createRow(item.name, item.date);
             });
@@ -458,112 +530,100 @@
     // ページ読み込み時の処理
     window.onload = function() {
         const local = JSON.parse(localStorage.getItem('sonaerukun_v3_data') || '{}');
-        
-        // 保存データの復元
-        if (local.items) {
-            const tbody = document.getElementById('expiry-list-body');
-            tbody.innerHTML = ''; 
-            local.items.forEach(item => {
-                if (item.name) createRow(item.name, item.date);
-            });
+        if (local.items || local.memo) {
+            reflectDataToUI(local);
         }
-
-        if (local.memo) {
-            document.getElementById('evac-place').value = local.memo.place || '';
-            document.getElementById('family-rule').value = local.memo.rule || '';
-            document.getElementById('emergency-tel').value = local.memo.tel || '';
-        }
-
         const savedKeyword = localStorage.getItem('sonaerukun_keyword');
         if (savedKeyword) {
             document.getElementById('sync-keyword').value = savedKeyword;
             currentKeyword = savedKeyword;
             observeData();
         }
+        updateTotalCount();
+        checkAllInputs();
+        sortItemsByDate();
     };
-    // 数字入力を監視して、異常な値や空欄をチェックする
-function limitInput(input) {
-    input.style.borderColor = "#e2e8f0"; // 色をリセット
 
-    if (input.value === "") {
-        input.style.borderColor = "#ef4444"; // 空なら赤く
-    } else {
-        // 100を超えたら100、0未満なら0に強制補正
-        if (parseFloat(input.value) > 100) {
-            alert("100人以内で入力してくださいね！");
-            input.value = 100;
-        } else if (parseFloat(input.value) < 0) {
-            input.value = 0;
+    // 入力制限
+    function limitInput(input) {
+        input.style.borderColor = "#e2e8f0";
+        if (input.value === "") {
+            input.style.borderColor = "#ef4444";
+        } else {
+            if (parseFloat(input.value) > 100) {
+                alert("100人以内で入力してくださいね！");
+                input.value = 100;
+            } else if (parseFloat(input.value) < 0) {
+                input.value = 0;
+            }
+        }
+        checkAllInputs();
+    }
+
+    function checkAllInputs() {
+        const inputs = document.querySelectorAll('input[type="number"]');
+        const submitBtn = document.getElementById('submit-btn');
+        const errorMsg = document.getElementById('error-message');
+        let hasError = false;
+        inputs.forEach(input => {
+            if (input.value === "" || isNaN(input.value)) hasError = true;
+        });
+
+        if (hasError) {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = "0.5";
+            submitBtn.style.cursor = "not-allowed";
+            if(errorMsg) errorMsg.style.display = "block";
+        } else {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = "1";
+            submitBtn.style.cursor = "pointer";
+            if(errorMsg) errorMsg.style.display = "none";
         }
     }
 
-    // ★重要：入力のたびにボタンの状態をチェックする
-    checkAllInputs();
-}
-
-// 全ての入力欄をチェックして、ボタンを無効化するか決める
-function checkAllInputs() {
-    const inputs = document.querySelectorAll('input[type="number"]');
-    const submitBtn = document.getElementById('submit-btn');
-    const errorMsg = document.getElementById('error-message'); // メッセージ要素を取得
-    let hasError = false;
-
-    inputs.forEach(input => {
-        if (input.value === "" || isNaN(input.value)) {
-            hasError = true;
+    function validateAll() {
+        const inputs = document.querySelectorAll('input[type="number"]');
+        for (let input of inputs) {
+            if (input.value === "") {
+                alert("未入力の項目があります。");
+                input.focus();
+                return false; 
+            }
         }
+        return true; 
+    }
+
+    function updateTotalCount() {
+        const male = parseInt(document.getElementById('maleCount').value) || 0;
+        const female = parseInt(document.getElementById('femaleCount').value) || 0;
+        const child = parseInt(document.getElementById('childCount').value) || 0;
+        const infant = parseInt(document.getElementsByName('infantCount')[0].value) || 0;
+        const senior = parseInt(document.getElementsByName('seniorCount')[0].value) || 0;
+        document.getElementById('familyCount').value = male + female + child + infant + senior;
+        checkAllInputs();
+    }
+    function sortItemsByDate() {
+    const tbody = document.getElementById('expiry-list-body');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    rows.sort((a, b) => {
+        const dateA = a.querySelector('.expiry-date').value;
+        const dateB = b.querySelector('.expiry-date').value;
+
+        // 空は一番下に
+        if (!dateA) return 1;
+        if (!dateB) return -1;
+
+        const diffA = new Date(dateA) - new Date();
+const diffB = new Date(dateB) - new Date();
+
+return diffA - diffB;
     });
 
-    if (hasError) {
-        submitBtn.disabled = true;
-        submitBtn.style.opacity = "0.5";
-        submitBtn.style.cursor = "not-allowed";
-        errorMsg.style.display = "block"; // エラーメッセージを表示！
-    } else {
-        submitBtn.disabled = false;
-        submitBtn.style.opacity = "1";
-        submitBtn.style.cursor = "pointer";
-        errorMsg.style.display = "none";  // 全て入力されたら消す！
-    }
+    // 並び替えた順に再配置
+    rows.forEach(row => tbody.appendChild(row));
 }
-
-// ボタンが押された時の最終チェック
-function validateAll() {
-    const inputs = document.querySelectorAll('input[type="number"]');
-    for (let input of inputs) {
-        if (input.value === "") {
-            alert("未入力の項目があります。数字を入力してください。");
-            input.focus();
-            input.style.borderColor = "#ef4444";
-            return false; 
-        }
-    }
-    return true; 
-}
-
-// ページを読み込んだ瞬間にもチェックを走らせる
-window.addEventListener('DOMContentLoaded', checkAllInputs);
-// すべての内訳を足し算して合計人数を出す関数
-function updateTotalCount() {
-    // それぞれのIDやnameから値を取得（空なら0にする）
-    const male = parseInt(document.getElementById('maleCount').value) || 0;
-    const female = parseInt(document.getElementById('femaleCount').value) || 0;
-    const child = parseInt(document.getElementById('childCount').value) || 0;
-    const infant = parseInt(document.getElementsByName('infantCount')[0].value) || 0;
-    const senior = parseInt(document.getElementsByName('seniorCount')[0].value) || 0;
-    
-    // 合計を計算
-    const total = male + female + child + infant + senior;
-
-    // 合計人数欄に反映
-    document.getElementById('familyCount').value = total;
-
-    // 合計が0人の場合はボタンを無効化するなどの追加チェックが必要ならここに書く
-    checkAllInputs();
-}
-
-// ページ読み込み時にも一度計算を走らせる
-window.addEventListener('DOMContentLoaded', updateTotalCount);
 </script>
 </body>
 </html>
