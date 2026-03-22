@@ -164,47 +164,63 @@
     <div id="calc-content">
         <form action="/calculate" method="post">
             <section>
-                <h2>🏠 家族構成の入力</h2>
-                <div class="form-group">
-                    <label>家族の合計人数</label>
-                    
-               <input type="number" name="familyCount" th:value="${param.familyCount ?: 1}" min="1" max="100" oninput="limitInput(this)">
-                </div>
-                <div style="display: flex; gap: 15px;">
-                    <div class="form-group" style="flex: 1;">
-                        <label>👶 乳幼児</label>
-                       <input type="number" name="infantCount" th:value="${param.infantCount ?: 0}" min="0" max="100" oninput="limitInput(this)">
-                    </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>🧓 高齢者</label>
-                        <input type="number" name="seniorCount" th:value="${param.seniorCount ?: 0}" min="0" max="100" oninput="limitInput(this)">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>⏳ 備蓄日数</label>
-                    <select name="days">
-                        <option value="1" th:selected="${param.days == '1'}">1日分（最短）</option>
-                        <option value="3" th:selected="${param.days == '3' or param.days == null}">3日分（標準）</option>
-                        <option value="7" th:selected="${param.days == '7'}">7日分（推奨）</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>👩‍🦰 女性の人数</label>
-                    <input type="number" id="femaleCount" name="femaleCount" th:value="${param.femaleCount ?: 0}" min="0" max="100" oninput="toggleHygieneArea(); limitInput(this);">
-                </div>
-                <div id="hygiene-area" th:style="${(param.femaleCount != null and param.femaleCount[0] != '0') ? 'display: block;' : 'display: none;'}">
-                    <label>✨ 生理用品の準備量</label>
-                    <select name="napkinLevel">
-                        <option value="low">少なめ</option>
-                        <option value="standard" selected>標準</option>
-                        <option value="high">多め</option>
-                    </select>
-                </div>
-                <p id="error-message" style="color: #ef4444; font-size: 0.85rem; font-weight: bold; text-align: center; margin-bottom: 10px; display: none;">
-    ⚠️ 全ての項目に数字を入力してください
-</p>
-<button type="submit" id="submit-btn" onclick="return validateAll()">計算してリストを作る</button>
-            </section>
+    <h2>🏠 家族構成の入力</h2>
+    
+    <div class="form-group">
+        <label>🏠 家族の合計人数（自動計算）</label>
+        <input type="number" id="familyCount" name="familyCount" th:value="${param.familyCount ?: 0}" 
+               readonly style="background-color: #f1f5f9; color: #64748b; cursor: not-allowed;">
+    </div>
+
+    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+        <div class="form-group" style="flex: 1;">
+            <label>👨 成人男性</label>
+            <input type="number" id="maleCount" name="maleCount" th:value="${param.maleCount ?: 0}" min="0" max="100" oninput="limitInput(this); updateTotalCount();">
+        </div>
+        <div class="form-group" style="flex: 1;">
+            <label>👩 成人女性</label>
+            <input type="number" id="femaleCount" name="femaleCount" th:value="${param.femaleCount ?: 0}" min="0" max="100" oninput="toggleHygieneArea(); limitInput(this); updateTotalCount();">
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <div class="form-group" style="flex: 1; min-width: 80px;">
+            <label>👦 子供</label>
+            <input type="number" id="childCount" name="childCount" th:value="${param.childCount ?: 0}" min="0" max="100" oninput="limitInput(this); updateTotalCount();">
+        </div>
+        <div class="form-group" style="flex: 1; min-width: 80px;">
+            <label>👶 乳幼児</label>
+            <input type="number" name="infantCount" th:value="${param.infantCount ?: 0}" min="0" max="100" oninput="limitInput(this); updateTotalCount();">
+        </div>
+        <div class="form-group" style="flex: 1; min-width: 80px;">
+            <label>🧓 高齢者</label>
+            <input type="number" name="seniorCount" th:value="${param.seniorCount ?: 0}" min="0" max="100" oninput="limitInput(this); updateTotalCount();">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>⏳ 備蓄日数</label>
+        <select name="days">
+            <option value="1" th:selected="${param.days == '1'}">1日分（最短）</option>
+            <option value="3" th:selected="${param.days == '3' or param.days == null}">3日分（標準）</option>
+            <option value="7" th:selected="${param.days == '7'}">7日分（推奨）</option>
+        </select>
+    </div>
+
+    <div id="hygiene-area" th:style="${(param.femaleCount != null and param.femaleCount[0] != '0') ? 'display: block;' : 'display: none;'}">
+        <label>✨ 生理用品の準備量</label>
+        <select name="napkinLevel">
+            <option value="low">少なめ</option>
+            <option value="standard" selected>標準</option>
+            <option value="high">多め</option>
+        </select>
+    </div>
+
+    <p id="error-message" style="color: #ef4444; font-size: 0.85rem; font-weight: bold; text-align: center; margin-bottom: 10px; display: none;">
+        ⚠️ 全ての項目に数字を入力してください
+    </p>
+    <button type="submit" id="submit-btn" onclick="return validateAll()">計算してリストを作る</button>
+</section>
         </form>
 
         <div th:if="${rankA != null}" style="margin-top: 10px;">
@@ -527,6 +543,27 @@ function validateAll() {
 
 // ページを読み込んだ瞬間にもチェックを走らせる
 window.addEventListener('DOMContentLoaded', checkAllInputs);
+// すべての内訳を足し算して合計人数を出す関数
+function updateTotalCount() {
+    // それぞれのIDやnameから値を取得（空なら0にする）
+    const male = parseInt(document.getElementById('maleCount').value) || 0;
+    const female = parseInt(document.getElementById('femaleCount').value) || 0;
+    const child = parseInt(document.getElementById('childCount').value) || 0;
+    const infant = parseInt(document.getElementsByName('infantCount')[0].value) || 0;
+    const senior = parseInt(document.getElementsByName('seniorCount')[0].value) || 0;
+    
+    // 合計を計算
+    const total = male + female + child + infant + senior;
+
+    // 合計人数欄に反映
+    document.getElementById('familyCount').value = total;
+
+    // 合計が0人の場合はボタンを無効化するなどの追加チェックが必要ならここに書く
+    checkAllInputs();
+}
+
+// ページ読み込み時にも一度計算を走らせる
+window.addEventListener('DOMContentLoaded', updateTotalCount);
 </script>
 </body>
 </html>

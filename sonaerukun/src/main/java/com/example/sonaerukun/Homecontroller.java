@@ -18,26 +18,28 @@ public class Homecontroller {
         return "index";
     }
 
-    
-@PostMapping("/calculate")
-public String calculate(
-        @RequestParam("familyCount") int familyCount,
-        @RequestParam("infantCount") int infantCount,   // ★追加
-        @RequestParam("seniorCount") int seniorCount,   // ★追加
-        @RequestParam("days") int days,
-        @RequestParam(value = "category", required = false) String category, // ★任意に
-        @RequestParam("femaleCount") int femaleCount,
-        @RequestParam(value = "napkinLevel", required = false, defaultValue = "standard") String napkinLevel,
-        Model model) {
-    
-    // ロジックへ渡す引数に乳幼児と高齢者を追加
-    SonaeruLogic.PreparednessResult result = sonaeruLogic.calculate(
-            familyCount, infantCount, seniorCount, days, femaleCount, napkinLevel); 
-    
-    model.addAttribute("rankA", result.rankA);
-    model.addAttribute("rankB", result.rankB);
-    model.addAttribute("rankC",result.rankC);
-    model.addAttribute("storageInfo", result.storageInfo);
-    return "index";
-}
+    @PostMapping("/calculate")
+    public String calculate(
+            @RequestParam("familyCount") int familyCount,
+            @RequestParam("maleCount") int maleCount,     // 大人（男性）
+            @RequestParam("femaleCount") int femaleCount, // 大人（女性）
+            @RequestParam("childCount") int childCount,   // 子供
+            @RequestParam("infantCount") int infantCount, // 乳幼児
+            @RequestParam("seniorCount") int seniorCount, // 高齢者
+            @RequestParam("days") int days,
+            @RequestParam(value = "napkinLevel", required = false, defaultValue = "standard") String napkinLevel,
+            Model model) {
+        
+        // ロジック（SonaeruLogic）を呼び出す
+        SonaeruLogic.PreparednessResult result = sonaeruLogic.calculate(
+                familyCount, maleCount, femaleCount, childCount, infantCount, seniorCount, days, napkinLevel); 
+        
+        // 結果を画面に渡す
+        model.addAttribute("rankA", result.rankA);
+        model.addAttribute("rankB", result.rankB);
+        model.addAttribute("rankC", result.rankC);
+        model.addAttribute("storageInfo", result.storageInfo);
+        
+        return "index";
+    }
 }
