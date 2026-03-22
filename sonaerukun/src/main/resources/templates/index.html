@@ -85,55 +85,43 @@
 </section>
         </form>
 
-        <div th:if="${rankA != null}" style="margin-top: 10px;">
-            <section class="rank-a">
-                <h2>🏃 ランクA：即座に持ち出す</h2>
-                <div class="item-grid">
-                    <div th:each="item : ${#strings.arraySplit(rankA, ',')}" th:classappend="${item.contains(': 0')} ? 'hidden-item' : 'grid-item'">
-                        <input type="checkbox"> <span th:text="${item.trim()}" onclick="searchItem(this.innerText)"></span>
-                    </div>
-                </div>
-            </section>
-
-            <section class="rank-b" th:if="${rankB != null}">
-                <h2>🏠 ランクB：自宅で備える</h2>
-                <div class="item-grid">
-                    <div th:each="item : ${#strings.arraySplit(rankB, ',')}" th:classappend="${item.contains(': 0')} ? 'hidden-item' : 'grid-item'">
-                        <input type="checkbox"> <span th:text="${item.trim()}" onclick="searchItem(this.innerText)"></span>
-                    </div>
-                </div>
-            </section>
-
-            <section class="rank-c" th:if="${rankC != null}">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h2>🔋 ランクC：日常で備える</h2>
-                    <button type="button" id="toggle-rank-c" onclick="toggleRankC()" style="background: var(--light-green); border: none; border-radius: 8px; padding: 8px 15px; cursor: pointer; color: var(--primary-color); font-weight: bold;">表示</button>
-                </div>
-                <div id="rank-c-content" class="item-grid" style="display: none;">
-                    <div th:each="item : ${#strings.arraySplit(rankC, ',')}" th:classappend="${item.contains(': 0')} ? 'hidden-item' : 'grid-item'">
-                        <input type="checkbox"> <span th:text="${item.trim()}" onclick="searchItem(this.innerText)"></span>
-                    </div>
-                </div>
-            </section>
-        </div>
+        <div th:if="${rankA != null}" class="result-container">
+    <div class="rank-tabs">
+        <button type="button" class="rank-tab active" onclick="showRank('A', event)">A</button>
+        <button type="button" class="rank-tab" onclick="showRank('B', event)">B</button>
+        <button type="button" class="rank-tab" onclick="showRank('C', event)">C</button>
     </div>
 
-    <div id="manage-content" style="display: none;">
-        <section>
-            <h2>📍 避難・連絡メモ</h2>
-            <div class="form-group">
-                <label>🏫 第一避難所</label>
-                <input type="text" id="evac-place" placeholder="例：〇〇小学校グラウンド" onchange="saveAllData()">
+   <section id="content-A" class="rank-content" style="display: block !important;">
+        <h2>🏃 ランクA: 即座に持ち出す</h2>
+        <div class="item-grid">
+            <div th:each="item : ${#strings.arraySplit(rankA, ',')}" class="grid-item">
+                <input type="checkbox"> <span th:text="${item.trim()}" onclick="searchItem(this.innerText)"></span>
             </div>
-            <div class="form-group">
-                <label>🤝 集合ルール</label>
-                <textarea id="family-rule" placeholder="例：夕方17時に正門前で待ち合わせ" onchange="saveAllData()" style="min-height: 80px;"></textarea>
+        </div>
+    </section>
+
+    <section id="content-B" class="rank-content" style="display:none;">
+        <h2>🏠 ランクB: 自宅で備える</h2>
+        <div class="item-grid">
+            <div th:each="item : ${#strings.arraySplit(rankB, ',')}" class="grid-item">
+                <input type="checkbox"> <span th:text="${item.trim()}" onclick="searchItem(this.innerText)"></span>
             </div>
-            <div class="form-group">
-                <label>📞 緊急連絡先</label>
-                <input type="tel" id="emergency-tel" placeholder="例：090-xxxx-xxxx（父）" onchange="saveAllData()">
+        </div>
+    </section>
+
+    <section id="content-C" class="rank-content" style="display:none;">
+        <h2>🔋 ランクC: 日常で備える</h2>
+        <div class="item-grid">
+            <div th:each="item : ${#strings.arraySplit(rankC, ',')}" class="grid-item">
+                <input type="checkbox"> <span th:text="${item.trim()}" onclick="searchItem(this.innerText)"></span>
             </div>
-        </section>
+        </div>
+    </section>
+</div>
+</div>
+<div id="manage-content" style="display: none;">
+   
 
        <section>
     <h2>🍞 備蓄品の期限管理</h2>
@@ -153,7 +141,21 @@
             </tbody>
     </table>
 </section>
-
+        <section>
+            <h2>📍 避難・連絡メモ</h2>
+            <div class="form-group">
+                <label>🏫 第一避難所</label>
+                <input type="text" id="evac-place" placeholder="例：〇〇小学校グラウンド" onchange="saveAllData()">
+            </div>
+            <div class="form-group">
+                <label>🤝 集合ルール</label>
+                <textarea id="family-rule" placeholder="例：夕方17時に正門前で待ち合わせ" onchange="saveAllData()" style="min-height: 80px;"></textarea>
+            </div>
+            <div class="form-group">
+                <label>📞 緊急連絡先</label>
+                <input type="tel" id="emergency-tel" placeholder="例：090-xxxx-xxxx（父）" onchange="saveAllData()">
+            </div>
+        </section>
         <div class="sync-section">
             <h3>🔗 家族とリアルタイム共有</h3>
             <p style="font-size: 0.85rem; color: #64748b;">合言葉を決めて、家族全員のスマホを同期しましょう。</p>

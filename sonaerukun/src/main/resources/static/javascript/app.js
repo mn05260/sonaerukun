@@ -269,3 +269,22 @@ return diffA - diffB;
     // 並び替えた順に再配置
     rows.forEach(row => tbody.appendChild(row));
 }
+function showRank(rankName, e) {
+    // 1. すべてのランクコンテンツを隠す
+    document.querySelectorAll('.rank-content').forEach(el => el.style.display = 'none');
+    
+    // 2. すべてのボタンの active クラスを消す
+    document.querySelectorAll('.rank-tab').forEach(btn => btn.classList.remove('active'));
+    
+    // 3. 指定されたランクを表示
+    const target = document.getElementById('content-' + rankName);
+    if (target) {
+        target.style.display = 'block';
+    }
+    
+    // 4. クリックされたボタンに active をつける
+    // event.currentTarget の代わりに e.currentTarget を使います
+    if (e && e.currentTarget) {
+        e.currentTarget.classList.add('active');
+    }
+}

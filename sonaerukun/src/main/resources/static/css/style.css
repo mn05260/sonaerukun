@@ -185,3 +185,141 @@
     border: none;
     outline: none;
 }
+@media(max-width: 768px){
+    .item-grid{
+        grid-template-columns: 1fr;        
+    }
+    main{
+        padding: 10px;
+    }
+    input[type="number"],
+    input[type="text"],
+    select{
+        font-size: 16px;
+        padding: 12px;
+    }
+    .tab-btn{
+        flex: 1;
+
+    }
+    .form-group label{
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+    }
+    .item-grid{
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    .grid-item{
+        background: #ecf3eb;
+        border-radius: 12px;
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .grid-item input[type="checkbox"] {
+    /* デフォルトのスタイルを少し上書き */
+    width: 18px;
+    height: 18px;
+    margin: 0; /* 余計な余白を消す */
+    cursor: pointer;
+    
+    /* ベンダープレフィックス（念のため） */
+    -webkit-appearance: checkbox;
+    appearance: checkbox;
+}
+.grid-item span {
+    color: #334155;
+    /* 文字が長すぎた場合に折り返す設定 */
+    word-break: break-all; 
+    line-height: 1.2;
+}
+}
+/* --- ランク切り替えの制御 --- */
+.rank-content {
+    display: none; /* 最初は全部隠す */
+}
+
+/* ランクタブ（しおり）のデザイン */
+.rank-tabs {
+    display: flex;
+    background: #f1f5f9;
+    border-radius: 12px;
+    padding: 4px;
+    margin: 15px 0;
+    gap: 4px;
+}
+
+.rank-tab {
+    flex: 1;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    background: transparent;
+    color: #64748b;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.rank-tab.active {
+    background: white;
+    color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* --- スマホ最適化 (レスポンシブ) --- */
+@media (max-width: 768px) {
+    main { padding: 10px; }
+    
+    /* 入力欄をスマホで押しやすく */
+    input[type="number"], input[type="text"], select {
+        font-size: 16px;
+        padding: 12px;
+    }
+
+    /* 結果のグリッドを2列にして縦長を回避 */
+    .item-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .grid-item {
+        font-size: 0.85rem;
+        padding: 10px;
+        min-height: 44px;
+    }
+}
+/* --- 期限管理の入力エリアをスリムにする --- */
+
+/* アイテム名と日付を入れる背景エリアを少し薄く、狭くする */
+section div[style*="background: var(--light-green)"] {
+    padding: 10px !important; /* 15pxから10pxに縮小 */
+    margin-bottom: 12px !important;
+}
+
+/* 入力欄自体のパディング（内側の余白）を削る */
+#new-item-name, 
+#new-item-date {
+    padding: 10px !important; /* 14pxから10pxにスリム化 */
+    font-size: 0.9rem !important; /* 文字を少し小さくして圧迫感を減らす */
+}
+
+/* 「追加」ボタンを小さくする */
+button[onclick="addItem()"] {
+    padding: 8px 16px !important; /* 上下を削ってシュッとさせる */
+    font-size: 0.9rem !important;
+}
+
+/* --- テーブル（リスト）も少しコンパクトに --- */
+.manage-table td {
+    padding: 8px 10px !important; /* 上下の余白をギュッと凝縮 */
+    font-size: 0.9rem;
+}
