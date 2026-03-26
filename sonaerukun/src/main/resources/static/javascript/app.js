@@ -288,3 +288,75 @@ function showRank(rankName, e) {
         e.currentTarget.classList.add('active');
     }
 }
+function showSyncQR(){
+    const keyword = document.getElementById('sync-keyword').value;
+    if(!keyword) return alert("合言葉を入力してください");
+    //QRコードを表示する場所を指定する
+    const area = document.getElementById('qrcode-area');
+    if(area) area.style.display = 'flex';
+    const qrContainer = document.getElementById("qrcode");
+    qrContainer.innerHTML = "";
+    //QRコードを作成
+    new QRCode(qrContainer, {
+        text: keyword,//合言葉をQRコードにする
+        width:160,
+        height:160,
+        colorDark:"#2d5a27",
+        colorLight:"#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+}
+let videoStream = null;
+
+async function startCamera() {
+    const video = document.getElementById("video");
+    const cameraSection = document.getElementById("camera-section");
+    cameraSection.style.display = "block";
+
+    // 1. カメラを起動
+    try {
+        videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        video.srcObject = videoStream;
+        video.setAttribute("playsinline", true); // iOS対策
+        await video.play();
+        requestAnimationFrame(tick); // 解析開始
+    } catch (err) {
+        alert("カメラの起動に失敗しました。設定を確認してください。");
+    }
+}
+
+function tick() {
+    const video = document.getElementById("video");
+    const canvasElement = document.getElementById("canvas");
+    const canvas = canvasElement.getContext("2d");
+
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvasElement.height = video.videoHeight;
+        canvasElement.width = video.videoWidth;
+        canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+        
+        const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+        // 2. QRコードを解析
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "dontInvert",
+        });
+
+        if (code) {
+            // 3. 見つかったら合言葉をセットして終了
+            document.getElementById("sync-keyword").value = code.data;
+            alert("同期キーを読み込みました！：「" + code.data + "」");
+            stopCamera();
+            startSync(); // そのまま同期実行
+            return;
+        }
+    }
+    if (videoStream) requestAnimationFrame(tick);
+}
+
+function stopCamera() {
+    if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+    }
+    document.getElementById("camera-section").style.display = "none";
+}

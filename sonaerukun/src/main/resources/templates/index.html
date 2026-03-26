@@ -9,7 +9,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-database-compat.js"></script>
 <link rel="stylesheet" th:href="@{/css/style.css}">
-</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <body>
 
 <header>
@@ -157,12 +158,30 @@
             </div>
         </section>
         <div class="sync-section">
-            <h3>🔗 家族とリアルタイム共有</h3>
-            <p style="font-size: 0.85rem; color: #64748b;">合言葉を決めて、家族全員のスマホを同期しましょう。</p>
-            <input type="text" id="sync-keyword" placeholder="家族共通の合言葉" style="text-align: center; margin-top: 10px;">
-            <button type="button" class="sync-btn" onclick="startSync()">同期を開始する</button>
-        </div>
+    <h3>🔗 家族とリアルタイム共有</h3>
+    <p style="font-size: 0.85rem; color: #64748b;">
+        合言葉を決めて同期するか、<br>QRコードを家族に見せて読み取ってもらいましょう。
+    </p>
+    
+    <input type="text" id="sync-keyword" placeholder="家族共通の合言葉" style="text-align: center; margin-top: 10px;">
+    
+    <div style="display: flex; gap: 10px; margin-top: 15px;">
+        <button type="button" class="sync-btn" style="flex: 1;" onclick="startSync()">合言葉で同期</button>
+        <button type="button" class="sync-btn" style="flex: 1; background: #64748b;" onclick="showSyncQR()">QRを表示</button>
     </div>
+
+    <div id="qrcode-area" style="margin-top: 20px; display: flex; flex-direction: column; align-items: center; display: none;">
+        <div id="qrcode"></div>
+        <p style="font-size: 0.75rem; color: #ef4444; margin-top: 10px;">家族にこのコードを写してもらってください</p>
+    </div>
+</div>
+    </div>
+    <div id="camera-section" style="display: none; text-align: center; margin-top: 20px;">
+    <video id="video" style="width: 100%; max-width: 300px; border-radius: 12px; border: 2px solid var(--primary-color);"></video>
+    <canvas id="canvas" style="display: none;"></canvas> <button type="button" class="sync-btn" style="background: #ef4444;" onclick="stopCamera()">キャンセル</button>
+</div>
+
+<button type="button" class="sync-btn" style="margin-top: 10px; background: #3b82f6;" onclick="startCamera()">QRを読み取る</button>
 </main>
 
 <script th:src="@{/javascript/app.js}"></script>

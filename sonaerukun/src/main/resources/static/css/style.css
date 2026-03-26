@@ -323,3 +323,47 @@ button[onclick="addItem()"] {
     padding: 8px 10px !important; /* 上下の余白をギュッと凝縮 */
     font-size: 0.9rem;
 }
+/* --- QRコード表示エリアの調整 --- */
+#qrcode {
+    padding: 10px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: inline-block; /* 中身に合わせてサイズを調整 */
+}
+
+#qrcode img {
+    display: block; /* 余計な隙間を消す */
+}
+
+/* --- カメラ（スキャン）画面の調整 --- */
+#camera-section {
+    position: relative;
+    background: #000;
+    border-radius: 20px;
+    overflow: hidden; /* 角丸をカメラ映像にも適用 */
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+
+#video {
+    width: 100%;
+    max-width: 400px;
+    display: block;
+    margin: 0 auto;
+    transform: scaleX(1); /* 鏡合わせにしたい場合は -1 にするがQR読み取りは 1 が基本 */
+}
+
+
+#camera-section::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    pointer-events: none; 
+}
