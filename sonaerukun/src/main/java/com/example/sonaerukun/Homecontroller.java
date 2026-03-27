@@ -6,16 +6,32 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
+import java.util.HashMap;
+import java.util.Map;
 @Controller
 public class Homecontroller {
 
     @Autowired
     private SonaeruLogic sonaeruLogic;
-
+//ユーザーIDと２０文字のカギを生成する
+private static final Map<String, String> USER_KEYS = new HashMap<>();
+static{
+    USER_KEYS.put("user1","12345678901234567890");
+    USER_KEYS.put("user2","09876543210987654321");
+}
     @GetMapping("/")
-    public String index() {
-        return "index";
+    public String index(
+        @RequestParam(name="id", required = false) String id,
+        @RequestParam(name="key", required = false) String key,
+        Model model
+
+    ) {
+        if(id !=null && key != null && key.equals(USER_KEYS.get(id))){
+            model.addAttribute("UserName", id);
+        return "index";//成功:いつもの画面に移動
+    }else{
+        return "error";//失敗:エラー画面へ
+    }
     }
 
     @PostMapping("/calculate")
