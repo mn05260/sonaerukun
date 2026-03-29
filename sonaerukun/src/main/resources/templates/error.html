@@ -1,20 +1,22 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>アクセス制限 - そなえるくん</title>
-    <style>
-        body { font-family: sans-serif; text-align: center; padding-top: 50px; background-color: #f8f9fa; }
-        .container { background: white; padding: 30px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { color: #dc3545; }
-    </style>
-</head>
 <body>
     <div class="container">
         <h1>⚠️ アクセス権がありません</h1>
-        <p>このアプリを利用するには、専用のQRコードからアクセスしてください。</p>
-        <p style="color: #666; font-size: 0.8em;">(IDまたはKeyが正しくありません)</p>
+        <p>申し訳ありませんが、このページを表示する権限がないか、セッションが切れています。</p>
+        
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+        
+        <a href="/" style="
+            display: inline-block; 
+            padding: 10px 20px; 
+            background-color: #2d5a27; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 5px;
+            font-weight: bold;
+        ">ログイン画面へ戻る</a>
+        
+        <p style="color: #666; font-size: 0.8em; margin-top: 20px;">
+            (Error: Authentication Required)
+        </p>
     </div>
 </body>
-</html>

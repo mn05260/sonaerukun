@@ -1,100 +1,101 @@
 :root {
-            --primary-color: #2d5a27; /* 深い安心感のある緑 */
-            --accent-color: #e67e22;  /* 灯火のような温かいオレンジ */
-            --bg-color: #f8fafc;      /* 清潔感のあるグレーホワイト */
-            --card-bg: #ffffff;
-            --text-color: #334155;
-            --light-green: #ecf3eb;
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-        }
+    --primary-color: #2d5a27; /* 深い安心感のある緑 */
+    --accent-color: #e67e22;  /* 灯火のような温かいオレンジ */
+    --bg-color: #f8fafc;      /* 清潔感のあるグレーホワイト */
+    --card-bg: #ffffff;
+    --text-color: #334155;
+    --light-green: #ecf3eb;
+    --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+}
 
-        body {
-            font-family: 'Noto Sans JP', sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            padding: 0;
-            color: var(--text-color);
-            line-height: 1.6;
-        }
+body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background-color: var(--bg-color);
+    margin: 0;
+    padding: 0;
+    color: var(--text-color);
+    line-height: 1.6;
+}
 
-        header {
-            text-align: center;
-            padding: 40px 20px;
-            background: linear-gradient(135deg, #2d5a27, #4a7c44);
-            color: white;
-            border-radius: 0 0 30px 30px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        }
-        header h1 { margin: 0; font-size: 2rem; letter-spacing: 2px; }
-        header p { opacity: 0.9; margin: 8px 0 0 0; font-size: 0.9rem; }
+header {
+    text-align: center;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #2d5a27, #4a7c44);
+    color: white;
+    border-radius: 0 0 30px 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+header h1 { margin: 0; font-size: 2rem; letter-spacing: 2px; }
+header p { opacity: 0.9; margin: 8px 0 0 0; font-size: 0.9rem; }
 
-        main { max-width: 650px; margin: -20px auto 40px; padding: 0 15px; }
+main { max-width: 650px; margin: -20px auto 40px; padding: 0 15px; }
 
-        /* タブデザイン */
-        .tab-container {
-            display: flex;
-            background: white;
-            padding: 6px;
-            border-radius: 16px;
-            gap: 5px;
-            box-shadow: var(--shadow);
-            margin-bottom: 25px;
-        }
-        .tab-btn {
-            flex: 1; padding: 14px; border: none; border-radius: 12px;
-            background: transparent; color: #64748b; cursor: pointer;
-            font-weight: bold; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .tab-btn.active {
-            background: var(--primary-color); color: white;
-        }
+/* タブデザイン */
+.tab-container {
+    display: flex;
+    background: white;
+    padding: 6px;
+    border-radius: 16px;
+    gap: 5px;
+    box-shadow: var(--shadow);
+    margin-bottom: 25px;
+}
+.tab-btn {
+    flex: 1; padding: 14px; border: none; border-radius: 12px;
+    background: transparent; color: #64748b; cursor: pointer;
+    font-weight: bold; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.tab-btn.active {
+    background: var(--primary-color); color: white;
+}
 
-        section {
-            background: var(--card-bg); border-radius: 24px;
-            padding: 24px; margin-bottom: 20px;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(0,0,0,0.02);
-        }
+section {
+    background: var(--card-bg); border-radius: 24px;
+    padding: 30px; /* 24pxから微増させ、入力画面での余白を最適化 */
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(0,0,0,0.02);
+}
 
-        h2 { font-size: 1.25rem; margin-top: 0; color: var(--primary-color); display: flex; align-items: center; gap: 10px; }
+h2 { font-size: 1.25rem; margin-top: 0; color: var(--primary-color); display: flex; align-items: center; gap: 10px; }
 
-        /* フォーム要素 */
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: bold; margin-bottom: 8px; color: #475569; font-size: 0.95rem; }
-        
-        input, select, textarea {
-            width: 100%; padding: 14px; border: 2px solid #e2e8f0;
-            border-radius: 12px; font-size: 1rem; box-sizing: border-box;
-            transition: all 0.2s; background: #fdfdfd;
-        }
-        input:focus { border-color: var(--primary-color); outline: none; background: white; }
+/* フォーム要素 */
+.form-group { margin-bottom: 20px; text-align: left; } /* text-align: leftを追加 */
+label { display: block; font-weight: bold; margin-bottom: 8px; color: #475569; font-size: 0.95rem; }
 
-        button[type="submit"] {
-            width: 100%; padding: 18px; background: var(--accent-color);
-            color: white; border: none; border-radius: 16px;
-            font-size: 1.1rem; font-weight: bold; cursor: pointer;
-            box-shadow: 0 10px 15px -3px rgba(230, 126, 34, 0.3);
-            transition: transform 0.2s;
-        }
-        button[type="submit"]:active { transform: scale(0.98); }
+input, select, textarea {
+    width: 100%; padding: 14px; border: 2px solid #e2e8f0;
+    border-radius: 12px; font-size: 1rem; box-sizing: border-box;
+    transition: all 0.2s; background: #fdfdfd;
+}
+input:focus { border-color: var(--primary-color); outline: none; background: white; }
 
-        /* 結果表示カード */
-        .item-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
-        .grid-item {
+button[type="submit"] {
+    width: 100%; padding: 18px; background: var(--accent-color);
+    color: white; border: none; border-radius: 16px;
+    font-size: 1.1rem; font-weight: bold; cursor: pointer;
+    box-shadow: 0 10px 15px -3px rgba(230, 126, 34, 0.3);
+    transition: transform 0.2s;
+    margin-top: 10px; /* ボタンの上に少し隙間を追加 */
+}
+button[type="submit"]:active { transform: scale(0.98); }
+
+/* 結果表示カード */
+.item-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+.grid-item {
     background: var(--light-green); 
     border-radius: 12px;
     padding: 14px; 
     display: flex; 
     align-items: center; 
-    justify-content: center; /* ✨ これで中身を中央寄せにする */
+    justify-content: center;
     gap: 10px;
-    font-size: 0.95rem; /* 少し大きく */
-    font-weight: bold;  /* ✨ 太文字にする */
-    text-align: center; /* テキスト自体も中央寄せ */
+    font-size: 0.95rem;
+    font-weight: bold;
+    text-align: center;
     transition: transform 0.2s;
 }
 
-/* チェックボックスと文字の間隔を整える */
 .grid-item input[type="checkbox"] {
     width: 18px;
     height: 18px;
@@ -102,42 +103,38 @@
     cursor: pointer;
 }
 
-/* マウスを乗せた時に少し浮き上がる演出（プロっぽさ！） */
 .grid-item:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
-        .grid-item span { cursor: pointer; color: var(--primary-color); }
-        
-        .rank-a { border-left: 8px solid #ef4444; }
-        .rank-b { border-left: 8px solid #3b82f6; }
-        .rank-c { border-left: 8px solid #10b981; }
+.grid-item span { cursor: pointer; color: var(--primary-color); }
 
-        /* 期限管理テーブルのモダン化 */
-        .manage-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
-        .manage-table th { padding: 10px; text-align: left; font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; }
-        .manage-table td { background: #f8fafc; padding: 10px; border: 1px solid #f1f5f9; }
-        .manage-table td:first-child { border-radius: 12px 0 0 12px; }
-        .manage-table td:last-child { border-radius: 0 12px 12px 0; }
-        .manage-table input { border: none; background: transparent; padding: 5px; }
+.rank-a { border-left: 8px solid #ef4444; }
+.rank-b { border-left: 8px solid #3b82f6; }
+.rank-c { border-left: 8px solid #10b981; }
 
-        /* 同期セクション */
-        .sync-section {
-            background: #f1f5f9; border: 2px dashed #cbd5e1;
-            text-align: center; padding: 24px; border-radius: 24px; margin-top: 30px;
-        }
-        .sync-btn {
-            background: var(--primary-color); color: white; border: none;
-            padding: 14px 30px; border-radius: 30px;
-            font-weight: bold; cursor: pointer; margin-top: 15px;
-        }
+/* 期限管理テーブルのモダン化 */
+.manage-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+.manage-table th { padding: 10px; text-align: left; font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; }
+.manage-table td { background: #f8fafc; padding: 10px; border: 1px solid #f1f5f9; }
+.manage-table td:first-child { border-radius: 12px 0 0 12px; }
+.manage-table td:last-child { border-radius: 0 12px 12px 0; }
+.manage-table input { border: none; background: transparent; padding: 5px; }
 
-        .hidden-item { display: none; }
-        @media (max-width: 480px) { .item-grid { grid-template-columns: 1fr; } }
-   /* trにクラスがついた時、中のtdすべての背景を変える */
-/* --- 警告感マシマシ設定 --- */
+/* 同期セクション */
+.sync-section {
+    background: #f1f5f9; border: 2px dashed #cbd5e1;
+    text-align: center; padding: 24px; border-radius: 24px; margin-top: 30px;
+}
+.sync-btn {
+    background: var(--primary-color); color: white; border: none;
+    padding: 14px 30px; border-radius: 30px;
+    font-weight: bold; cursor: pointer; margin-top: 15px;
+}
 
-/* 期限切れ・1ヶ月未満：強い赤と太字 */
+.hidden-item { display: none; }
+
+/* 警告感マシマシ設定 */
 .status-danger td { 
     background-color: #fecaca !important; 
     border-top: 2px solid #ef4444 !important;
@@ -147,9 +144,6 @@
     color: #b91c1c !important; 
     font-weight: 900 !important; 
 }
-/* 期限切れに警告アイコンを擬似的に出す（オプション） */
-
-/* 3ヶ月未満：注意を促すオレンジ */
 .status-warning td { 
     background-color: #fed7aa !important; 
     border-top: 2px solid #f97316 !important;
@@ -159,95 +153,22 @@
     color: #c2410c !important; 
     font-weight: bold; 
 }
-
-/* 安全：落ち着いた緑（枠線なし） */
 .status-safe td { 
     background-color: #bbf7d0 !important; 
     color: #166534 !important; 
 }
-/* 危険（期限切れ） */
-.status-danger td:first-child::before { 
-    content: "❌ "; 
-}
+.status-danger td:first-child::before { content: "❌ "; }
+.status-warning td:first-child::before { content: "⚠️ "; }
+.status-safe td:first-child::before { content: "✅ "; }
 
-/* 注意（3ヶ月未満） */
-.status-warning td:first-child::before { 
-    content: "⚠️ "; 
-}
-
-/* 安全 */
-.status-safe td:first-child::before { 
-    content: "✅ "; 
-}
-/* 入力欄の調整（共通） */
 .manage-table input {
     background: transparent !important;
     border: none;
     outline: none;
 }
-@media(max-width: 768px){
-    .item-grid{
-        grid-template-columns: 1fr;        
-    }
-    main{
-        padding: 10px;
-    }
-    input[type="number"],
-    input[type="text"],
-    select{
-        font-size: 16px;
-        padding: 12px;
-    }
-    .tab-btn{
-        flex: 1;
 
-    }
-    .form-group label{
-        font-size: 0.85rem;
-        margin-bottom: 4px;
-    }
-    .item-grid{
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin-top: 15px;
-    }
-    .grid-item{
-        background: #ecf3eb;
-        border-radius: 12px;
-        padding: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        gap: 8px;
-        font-size: 0.9rem;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-    .grid-item input[type="checkbox"] {
-    /* デフォルトのスタイルを少し上書き */
-    width: 18px;
-    height: 18px;
-    margin: 0; /* 余計な余白を消す */
-    cursor: pointer;
-    
-    /* ベンダープレフィックス（念のため） */
-    -webkit-appearance: checkbox;
-    appearance: checkbox;
-}
-.grid-item span {
-    color: #334155;
-    /* 文字が長すぎた場合に折り返す設定 */
-    word-break: break-all; 
-    line-height: 1.2;
-}
-}
-/* --- ランク切り替えの制御 --- */
-.rank-content {
-    display: none; /* 最初は全部隠す */
-}
-
-/* ランクタブ（しおり）のデザイン */
+/* ランク切り替えの制御 */
+.rank-content { display: none; }
 .rank-tabs {
     display: flex;
     background: #f1f5f9;
@@ -256,114 +177,57 @@
     margin: 15px 0;
     gap: 4px;
 }
-
 .rank-tab {
-    flex: 1;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    background: transparent;
-    color: #64748b;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
+    flex: 1; border: none; padding: 12px; border-radius: 8px;
+    background: transparent; color: #64748b; font-weight: bold;
+    cursor: pointer; transition: 0.3s;
 }
-
 .rank-tab.active {
-    background: white;
-    color: var(--primary-color);
+    background: white; color: var(--primary-color);
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* --- スマホ最適化 (レスポンシブ) --- */
-@media (max-width: 768px) {
-    main { padding: 10px; }
-    
-    /* 入力欄をスマホで押しやすく */
-    input[type="number"], input[type="text"], select {
-        font-size: 16px;
-        padding: 12px;
-    }
-
-    /* 結果のグリッドを2列にして縦長を回避 */
-    .item-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-    }
-
-    .grid-item {
-        font-size: 0.85rem;
-        padding: 10px;
-        min-height: 44px;
-    }
-}
-/* --- 期限管理の入力エリアをスリムにする --- */
-
-/* アイテム名と日付を入れる背景エリアを少し薄く、狭くする */
+/* スリム化調整 */
 section div[style*="background: var(--light-green)"] {
-    padding: 10px !important; /* 15pxから10pxに縮小 */
+    padding: 10px !important;
     margin-bottom: 12px !important;
 }
-
-/* 入力欄自体のパディング（内側の余白）を削る */
-#new-item-name, 
-#new-item-date {
-    padding: 10px !important; /* 14pxから10pxにスリム化 */
-    font-size: 0.9rem !important; /* 文字を少し小さくして圧迫感を減らす */
+#new-item-name, #new-item-date {
+    padding: 10px !important; font-size: 0.9rem !important;
 }
-
-/* 「追加」ボタンを小さくする */
 button[onclick="addItem()"] {
-    padding: 8px 16px !important; /* 上下を削ってシュッとさせる */
-    font-size: 0.9rem !important;
+    padding: 8px 16px !important; font-size: 0.9rem !important;
 }
-
-/* --- テーブル（リスト）も少しコンパクトに --- */
 .manage-table td {
-    padding: 8px 10px !important; /* 上下の余白をギュッと凝縮 */
-    font-size: 0.9rem;
+    padding: 8px 10px !important; font-size: 0.9rem;
 }
-/* --- QRコード表示エリアの調整 --- */
+
+/* QR & カメラ */
 #qrcode {
-    padding: 10px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    display: inline-block; /* 中身に合わせてサイズを調整 */
+    padding: 10px; background: white; border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: inline-block;
 }
-
-#qrcode img {
-    display: block; /* 余計な隙間を消す */
-}
-
-/* --- カメラ（スキャン）画面の調整 --- */
+#qrcode img { display: block; }
 #camera-section {
-    position: relative;
-    background: #000;
-    border-radius: 20px;
-    overflow: hidden; /* 角丸をカメラ映像にも適用 */
-    margin: 20px 0;
-    box-shadow: var(--shadow);
+    position: relative; background: #000; border-radius: 20px;
+    overflow: hidden; margin: 20px 0; box-shadow: var(--shadow);
 }
-
-#video {
-    width: 100%;
-    max-width: 400px;
-    display: block;
-    margin: 0 auto;
-    transform: scaleX(1); /* 鏡合わせにしたい場合は -1 にするがQR読み取りは 1 が基本 */
-}
-
-
+#video { width: 100%; max-width: 400px; display: block; margin: 0 auto; }
 #camera-section::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 200px;
-    height: 200px;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    border-radius: 20px;
+    content: ""; position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%); width: 200px; height: 200px;
+    border: 2px solid rgba(255, 255, 255, 0.5); border-radius: 20px;
     pointer-events: none; 
+}
+
+/* レスポンシブ設定 */
+@media (max-width: 768px) {
+    main { padding: 10px; }
+    input[type="number"], input[type="text"], select {
+        font-size: 16px; padding: 12px;
+    }
+    .item-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .grid-item { font-size: 0.85rem; padding: 10px; min-height: 44px; justify-content: flex-start; }
+    .tab-btn { flex: 1; }
+    .form-group label { font-size: 0.85rem; margin-bottom: 4px; }
 }
