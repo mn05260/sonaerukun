@@ -25,6 +25,12 @@
         <h3 style="font-size: 0.9rem; color: #64748b; margin: 0 0 10px 0; display: flex; align-items: center;">
             <span style="margin-right: 8px;">👥</span> つながっている家族
         </h3>
+        <div style="background: #fff3cd; padding: 10px; font-size: 0.7rem; color: #856404; border-radius: 8px; margin-bottom: 10px;">
+    DEBUG INFO: <br>
+    ログイン中: <span th:text="${UserName}"></span> <br>
+    検索キー(hostName): <span th:text="${session.hostName}"></span> <br>
+    見つかった家族数: <span th:text="${#lists.size(members)}"></span>人
+</div>
         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
             <div th:each="member : ${members}" 
                  style="background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; color: #334155; border: 1px solid #cbd5e1;">
