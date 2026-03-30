@@ -130,4 +130,12 @@ public String joinFamily(@RequestParam String keyword, HttpSession session) {
 
     return "redirect:/index";
 }
+@GetMapping("/debug")
+public String debug() {
+    List<User> users = userRepository.findAll();
+    for (User u : users) {
+        System.out.println("ユーザー: " + u.getUsername() + " / hostName: " + u.getHostName());
+    }
+    return "login"; 
+}
 }
