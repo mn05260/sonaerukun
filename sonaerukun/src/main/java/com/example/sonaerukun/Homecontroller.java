@@ -67,7 +67,13 @@ public class Homecontroller {
         User newUser = new User();
         newUser.setUsername(username);
         newUser.setPassword(password);
-        newUser.setHostName(hostName); 
+        if(hostName == null ||hostName.isEmpty()){
+            //QR経由じゃない場合は、自分の名前をホスト名にする
+            newUser.setHostName(username);
+        } else{
+            //QR経由の場合は、送られてきたホスト名を設定する
+            newUser.setHostName(hostName);
+        }
         userRepository.save(newUser);
         return "redirect:/";
     }
