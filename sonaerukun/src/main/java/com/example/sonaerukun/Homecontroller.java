@@ -66,7 +66,7 @@ public String login(@RequestParam String username, @RequestParam String password
 
     @PostMapping("/signup")
     public String signup(@RequestParam String username, @RequestParam String password, 
-                        @RequestParam(required = false) String hostName) { // ★QRコード等から受け取る想定
+                        @RequestParam(name = "hostName", required = false) String hostName) { // ★QRコード等から受け取る想定
         User newUser = new User();
         newUser.setUsername(username);
         newUser.setPassword(password);

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>ログイン - そなえるくん</title>
@@ -15,9 +15,9 @@
     <main>
         <section>
             <h2>🔑 ログイン</h2>
-            <p th:if="${error}" style="color: #ef4444; font-size: 0.9rem; text-align: center; margin-bottom: 15px; font-weight: bold;">
-        ⚠️ ユーザー名かパスワードが違います
-    </p>
+
+            <p th:if="${error}" th:text="${error}" style="color: #ef4444; font-size: 0.9rem; text-align: center; margin-bottom: 15px; font-weight: bold;"></p>
+
             <form th:action="@{/login}" method="post">
                 <div class="form-group">
                     <label>ユーザー名</label>
