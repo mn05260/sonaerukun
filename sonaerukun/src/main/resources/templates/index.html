@@ -208,6 +208,25 @@
 <button type="button" class="sync-btn" style="margin-top: 10px; background: #3b82f6;" onclick="startCamera()">QRを読み取る</button>
 </main>
 
+<script th:inline="javascript">
+    const sessionHostName = /*[[${session.hostName}]]*/ '';
+    const currentUserName = /*[[${UserName}]]*/ '';
+
+    // ページが読み込まれたら自動実行
+    window.addEventListener('load', function() {
+        const syncInput = document.getElementById('sync-keyword');
+        
+        // 1. もしJava側にホスト名（合言葉）があるなら
+        if (sessionHostName && sessionHostName !== '') {
+            // 入力欄に自動セット
+            if (syncInput) syncInput.value = sessionHostName;
+            if (typeof startSync === 'function') {
+                console.log("家族グループ「" + sessionHostName + "」に自動接続します...");
+                startSync(); 
+            }
+        }
+    });
+</script>
 <script th:src="@{/javascript/app.js}"></script>
 </body>
 </html>

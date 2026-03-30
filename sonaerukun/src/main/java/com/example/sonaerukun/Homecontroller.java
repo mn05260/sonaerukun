@@ -25,22 +25,23 @@ public class Homecontroller {
         return "login";
     }
 
-    @PostMapping("/login")
-    public String login(@RequestParam String username, @RequestParam String password, 
-                        HttpSession session, Model model) {
-        
-        Optional<User> user = userRepository.findById(username);
-        
-        if (user.isPresent() && user.get().getPassword().equals(password)) {
-            session.setAttribute("userName", username); 
+   @PostMapping("/login")
+public String login(@RequestParam String username, @RequestParam String password, 
+                    HttpSession session, Model model) {
     
-            session.setAttribute("hostName", user.get().getHostName()); 
-            return "redirect:/index"; 
-        } else {
-            model.addAttribute("error", "ユーザー名またはパスワードが違います");
-            return "login";
-        }
+    Optional<User> userOpt = userRepository.findById(username);
+    
+    if (userOpt.isPresent() && userOpt.get().getPassword().equals(password)) {
+        User user = userOpt.get(); // Optionalから中身を取り出す
+        session.setAttribute("userName", username); 
+        session.setAttribute("hostName", user.getHostName()); 
+        
+        return "redirect:/index"; 
+    } else {
+        model.addAttribute("error", "ユーザー名またはパスワードが違います");
+        return "login";
     }
+}
 
     @GetMapping("/index")
     public String showIndex(HttpSession session, Model model) {
@@ -57,8 +58,10 @@ public class Homecontroller {
     }
 
     @GetMapping("/signup")
-    public String signupForm() {
+    public String signupForm(@RequestParam(required = false)String hostName, Model model) {
+        model.addAttribute("hostName", hostName);
         return "signup";
+
     }
 
     @PostMapping("/signup")

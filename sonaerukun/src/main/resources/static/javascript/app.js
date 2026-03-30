@@ -174,21 +174,33 @@
 
     // ページ読み込み時の処理
     window.onload = function() {
-        const local = JSON.parse(localStorage.getItem('sonaerukun_v3_data') || '{}');
-        if (local.items || local.memo) {
-            reflectDataToUI(local);
-        }
+    // 1. まずローカルのデータを表示
+    const local = JSON.parse(localStorage.getItem('sonaerukun_v3_data') || '{}');
+    if (local.items || local.memo) {
+        reflectDataToUI(local);
+    }
+    const familyHostName = "[[${session.hostName}]]"; 
+    
+    if (familyHostName && familyHostName !== "[[${session.hostName}]]") { 
+        // hostNameが存在すれば、それをFirebaseの「合言葉」として自動セット
+        currentKeyword = familyHostName;
+        document.getElementById('sync-keyword').value = familyHostName;
+        observeData(); // 自動で同期開始！
+        console.log("家族グループ「" + familyHostName + "」に自動接続しました");
+    } else {
+        // hostNameがない（またはThymeleafが効かない）場合は、以前のキーワードをチェック
         const savedKeyword = localStorage.getItem('sonaerukun_keyword');
         if (savedKeyword) {
             document.getElementById('sync-keyword').value = savedKeyword;
             currentKeyword = savedKeyword;
             observeData();
         }
-        updateTotalCount();
-        checkAllInputs();
-        sortItemsByDate();
-    };
+    }
 
+    updateTotalCount();
+    checkAllInputs();
+    sortItemsByDate();
+};
     // 入力制限
     function limitInput(input) {
         input.style.borderColor = "#e2e8f0";

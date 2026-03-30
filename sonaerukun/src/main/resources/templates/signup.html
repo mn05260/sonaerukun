@@ -16,7 +16,7 @@
         <section>
             <h2>📝 アカウント作成</h2>
             <form th:action="@{/signup}" method="post">
-    <input type="hidden" name="hostName" th:value="${param.hostName}">
+    <input type="hidden" name="hostName" th:value="${hostName}">
 
     <div class="form-group">
         <label>ユーザー名</label>
