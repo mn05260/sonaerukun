@@ -114,4 +114,20 @@ public String calculate(
     
     return "index";
 }
+@PostMapping("/joinFamily")
+public String joinFamily(@RequestParam String keyword, HttpSession session) {
+
+    String username = (String) session.getAttribute("userName");
+    if (username == null) return "redirect:/";
+
+    // 今ログインしてるユーザー取得
+    User user = userRepository.findById(username).orElse(null);
+    if (user != null) {
+        user.setHostName(keyword); // ← 合言葉をhostNameにセット
+        userRepository.save(user); // ← DB更新
+    }
+    session.setAttribute("hostName", keyword);
+
+    return "redirect:/index";
+}
 }

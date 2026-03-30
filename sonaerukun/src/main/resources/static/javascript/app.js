@@ -131,24 +131,30 @@
         }
     }
 
-    function startSync() {
-        const keyword = document.getElementById('sync-keyword').value.trim();
-        if (!keyword) return alert("合言葉を入力してください");
-        currentKeyword = keyword;
-        localStorage.setItem('sonaerukun_keyword', keyword);
-        
-        database.ref('users/' + keyword).once('value').then((snapshot) => {
-            if (snapshot.exists()) {
-                reflectDataToUI(snapshot.val());
-                alert("家族のデータと同期しました！");
-            } else {
-                saveAllData();
-                alert("新しいグループを作成しました！");
-            }
-            observeData();
-        });
-    }
+   function startSync() {
+    const keyword = document.getElementById('sync-keyword').value.trim();
+    if (!keyword) return alert("合言葉を入力してください");
 
+    currentKeyword = keyword;
+    localStorage.setItem('sonaerukun_keyword', keyword);
+    fetch('/joinFamily', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'keyword=' + encodeURIComponent(keyword)
+    });
+    database.ref('users/' + keyword).once('value').then((snapshot) => {
+        if (snapshot.exists()) {
+            reflectDataToUI(snapshot.val());
+            alert("家族のデータと同期しました！");
+        } else {
+            saveAllData();
+            alert("新しいグループを作成しました！");
+        }
+        observeData();
+    });
+}
     function observeData() {
         if (!currentKeyword) return;
         database.ref('users/' + currentKeyword).on('value', (snapshot) => {
@@ -310,7 +316,7 @@ function showSyncQR(){
     qrContainer.innerHTML = "";
     //QRコードを作成
     new QRCode(qrContainer, {
-        text: keyword,//合言葉をQRコードにする
+        text: "http://localhost:8081/signup?hostName=" + keyword,
         width:160,
         height:160,
         colorDark:"#2d5a27",
