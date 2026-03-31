@@ -1,6 +1,4 @@
 package com.example.sonaerukun;
-
-import com.example.sonaerukun.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -28,6 +26,11 @@ public class Homecontroller {
    @PostMapping("/login")
 public String login(@RequestParam String username, @RequestParam String password, 
                     HttpSession session, Model model) {
+    
+    if (username == null || username.isEmpty()) {
+        model.addAttribute("error", "ユーザー名またはパスワードが違います");
+        return "login";
+    }
     
     Optional<User> userOpt = userRepository.findById(username);
     

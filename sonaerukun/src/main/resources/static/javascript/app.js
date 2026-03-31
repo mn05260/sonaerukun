@@ -137,14 +137,20 @@
 
     currentKeyword = keyword;
     localStorage.setItem('sonaerukun_keyword', keyword);
+
+    // 1. まずはJava（RenderのDB）に合言葉を保存しに行く
     fetch('/joinFamily', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: 'keyword=' + encodeURIComponent(keyword)
-    });
-    database.ref('users/' + keyword).once('value').then((snapshot) => {
+    })
+    .then(response => {
+        // 2. DBの保存が終わったら、Firebaseからデータを取ってくる
+        return database.ref('users/' + keyword).once('value');
+    })
+    .then((snapshot) => {
         if (snapshot.exists()) {
             reflectDataToUI(snapshot.val());
             alert("家族のデータと同期しました！");
@@ -153,8 +159,14 @@
             alert("新しいグループを作成しました！");
         }
         observeData();
+        location.reload(); 
+    })
+    .catch(error => {
+        console.error("同期中にエラーが発生しました:", error);
+        alert("同期に失敗しました。ネット接続を確認してください。");
     });
 }
+
     function observeData() {
         if (!currentKeyword) return;
         database.ref('users/' + currentKeyword).on('value', (snapshot) => {
@@ -187,14 +199,12 @@
     }
     const familyHostName = "[[${session.hostName}]]"; 
     
-    if (familyHostName && familyHostName !== "[[${session.hostName}]]") { 
-        // hostNameが存在すれば、それをFirebaseの「合言葉」として自動セット
+   if (familyHostName && familyHostName !== '') { 
         currentKeyword = familyHostName;
         document.getElementById('sync-keyword').value = familyHostName;
-        observeData(); // 自動で同期開始！
-        console.log("家族グループ「" + familyHostName + "」に自動接続しました");
+        observeData(); // 自動でFirebaseの監視を開始
+        console.log("DBの合言葉で同期開始: " + familyHostName);
     } else {
-        // hostNameがない（またはThymeleafが効かない）場合は、以前のキーワードをチェック
         const savedKeyword = localStorage.getItem('sonaerukun_keyword');
         if (savedKeyword) {
             document.getElementById('sync-keyword').value = savedKeyword;
