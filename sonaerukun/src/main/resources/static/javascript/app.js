@@ -45,92 +45,84 @@
 
     // アイテムを追加する
     function addItem() {
-        const nameInput = document.getElementById('new-item-name');
-        const dateInput = document.getElementById('new-item-date');
-        const name = nameInput.value.trim();
-        const date = dateInput.value;
-        if (!name) return alert("アイテム名を入力してください");
+    const nameInput = document.getElementById('new-item-name');
+    const dateInput = document.getElementById('new-item-date');
+    const name = nameInput.value.trim();
+    const date = dateInput.value;
+    if (!name) return alert("アイテム名を入力してください");
 
-        createRow(name, date);
-        sortItemsByDate(); 
-        nameInput.value = '';
-        dateInput.value = '';
-        saveAllData();
-    }
+    createRow(name, date); // 下の新しいcreateRowが動きます
+    sortItemsByDate(); 
+    nameInput.value = '';
+    dateInput.value = '';
+    saveAllData();
+}
 
-    // --- ★色分けロジック付きのcreateRow ---
-    function createRow(name, date) {
-        const tbody = document.getElementById('expiry-list-body');
-        const tr = document.createElement('tr');
-        
-        tr.innerHTML = `
-            <td><input type="text" class="expiry-name" value="${name}" onchange="saveAllData()"></td>
-            <td><input type="month" class="expiry-date" value="${date}" onchange="saveAllData(); updateRowColor(this.parentElement.parentElement); sortItemsByDate();"></td>
-            <td style="text-align: center;">
-                <button type="button" onclick="this.parentElement.parentElement.remove(); saveAllData();" 
-                    style="background: #fee2e2; color: #ef4444; border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 0.8rem;">
-                    削除
-                </button>
-            </td>
-        `;
-        tbody.appendChild(tr);
-        updateRowColor(tr); // 追加時に色を判定
-    }
+// 2. カードUI生成関数（重要：ここをtable用からdiv用に変更）
+function createRow(name, date) {
+    const container = document.getElementById('expiry-list-container');
+    if (!container) return;
 
-    // --- ★色を塗る関数本体 ---
-    function updateRowColor(tr) {
-    const dateInput = tr.querySelector('.expiry-date');
-    let statusLabel = tr.querySelector('.status-label');
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    
+    card.innerHTML = `
+        <div class="card-info">
+            <input type="text" class="card-item-name" value="${name}" onchange="saveAllData()" placeholder="アイテム名">
+            <div style="display: flex; align-items: center; gap: 5px;">
+                <span style="font-size: 0.75rem; color: #94a3b8;">期限:</span>
+                <input type="month" class="card-item-date" value="${date}" 
+                       onchange="saveAllData(); updateCardColor(this.parentElement.parentElement.parentElement); sortItemsByDate();">
+            </div>
+        </div>
+        <button type="button" class="card-delete-btn" onclick="this.parentElement.remove(); saveAllData();">×</button>
+    `;
+    container.appendChild(card);
+    updateCardColor(card);
+}
 
-    if (!statusLabel) {
-        statusLabel = document.createElement('span');
-        statusLabel.className = 'status-label';
-        tr.children[0].appendChild(statusLabel);
-    }
-
-    if (!dateInput.value) return;
+// 3. カードの色判定関数（クラス名をカード用に変更）
+function updateCardColor(card) {
+    const dateInput = card.querySelector('.card-item-date');
+    if (!dateInput || !dateInput.value) return;
 
     const expiryDate = new Date(dateInput.value + "-01");
     const today = new Date();
     const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const diffMonths = (expiryDate.getFullYear() - currentMonth.getFullYear()) * 12 + (expiryDate.getMonth() - currentMonth.getMonth());
 
-    tr.classList.remove('status-danger', 'status-warning', 'status-safe');
+    card.classList.remove('status-danger-card', 'status-warning-card', 'status-safe-card');
 
     if (diffMonths < 1) {
-        tr.classList.add('status-danger');
-        statusLabel.textContent = "（期限切れ）";
+        card.classList.add('status-danger-card');
     } else if (diffMonths < 3) {
-        tr.classList.add('status-warning');
-        statusLabel.textContent = "（注意）";
+        card.classList.add('status-warning-card');
     } else {
-        tr.classList.add('status-safe');
-        statusLabel.textContent = "（安全）";
+        card.classList.add('status-safe-card');
     }
 }
 
-    // 保存・同期処理
-    function saveAllData() {
-        const names = document.querySelectorAll('.expiry-name');
-        const dates = document.querySelectorAll('.expiry-date');
-        const items = Array.from(names).map((el, i) => ({ 
-            name: el.value, 
-            date: dates[i].value 
-        })).filter(item => item.name !== "");
+// 4. 保存関数（取得先のクラス名をカード用に変更）
+function saveAllData() {
+    const names = document.querySelectorAll('.card-item-name');
+    const dates = document.querySelectorAll('.card-item-date');
+    const items = Array.from(names).map((el, i) => ({ 
+        name: el.value, 
+        date: dates[i].value 
+    })).filter(item => item.name !== "");
 
-        const memo = {
-            place: document.getElementById('evac-place').value,
-            rule: document.getElementById('family-rule').value,
-            tel: document.getElementById('emergency-tel').value
-        };
+    const memo = {
+        place: document.getElementById('evac-place').value,
+        rule: document.getElementById('family-rule').value,
+        tel: document.getElementById('emergency-tel').value
+    };
 
-        const allData = { items, memo };
-        localStorage.setItem('sonaerukun_v3_data', JSON.stringify(allData));
-        if (currentKeyword) {
-            database.ref('users/' + currentKeyword).set(allData);
-        }
+    const allData = { items, memo };
+    localStorage.setItem('sonaerukun_v3_data', JSON.stringify(allData));
+    if (currentKeyword) {
+        database.ref('users/' + currentKeyword).set(allData);
     }
-
+}
    function startSync() {
     const keyword = document.getElementById('sync-keyword').value.trim();
     if (!keyword) return alert("合言葉を入力してください");
@@ -175,20 +167,19 @@
     }
 
     // 取得したデータを画面に反映
-    function reflectDataToUI(data) {
-        const tbody = document.getElementById('expiry-list-body');
-        if (data.items) {
-            tbody.innerHTML = ''; 
-            data.items.forEach(item => {
-                createRow(item.name, item.date);
-            });
-        }
-        if (data.memo) {
-            document.getElementById('evac-place').value = data.memo.place || '';
-            document.getElementById('family-rule').value = data.memo.rule || '';
-            document.getElementById('emergency-tel').value = data.memo.tel || '';
-        }
+   function reflectDataToUI(data) {
+    const container = document.getElementById('expiry-list-container');
+    if (!container) return;
+    if (data.items) {
+        container.innerHTML = ''; 
+        data.items.forEach(item => createRow(item.name, item.date));
     }
+    if (data.memo) {
+        document.getElementById('evac-place').value = data.memo.place || '';
+        document.getElementById('family-rule').value = data.memo.rule || '';
+        document.getElementById('emergency-tel').value = data.memo.tel || '';
+    }
+}
 
     // ページ読み込み時の処理
     window.onload = function() {
@@ -277,25 +268,17 @@
         checkAllInputs();
     }
     function sortItemsByDate() {
-    const tbody = document.getElementById('expiry-list-body');
-    const rows = Array.from(tbody.querySelectorAll('tr'));
-
-    rows.sort((a, b) => {
-        const dateA = a.querySelector('.expiry-date').value;
-        const dateB = b.querySelector('.expiry-date').value;
-
-        // 空は一番下に
+    const container = document.getElementById('expiry-list-container');
+    if (!container) return;
+    const cards = Array.from(container.querySelectorAll('.item-card'));
+    cards.sort((a, b) => {
+        const dateA = a.querySelector('.card-item-date').value;
+        const dateB = b.querySelector('.card-item-date').value;
         if (!dateA) return 1;
         if (!dateB) return -1;
-
-        const diffA = new Date(dateA) - new Date();
-const diffB = new Date(dateB) - new Date();
-
-return diffA - diffB;
+        return new Date(dateA) - new Date(dateB);
     });
-
-    // 並び替えた順に再配置
-    rows.forEach(row => tbody.appendChild(row));
+    cards.forEach(card => container.appendChild(card));
 }
 function showRank(rankName, e) {
     // 1. すべてのランクコンテンツを隠す

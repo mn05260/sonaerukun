@@ -69,7 +69,15 @@ public String login(@RequestParam String username, @RequestParam String password
 
     @PostMapping("/signup")
     public String signup(@RequestParam String username, @RequestParam String password, 
-                        @RequestParam(name = "hostName", required = false) String hostName) { // ★QRコード等から受け取る想定
+                        @RequestParam(name = "hostName", required = false) String hostName, Model model) { // ★QRコード等から受け取る想定
+        if(userRepository.existsById(username)){
+            model.addAttribute("error", "このユーザー名は既に存在しています");
+            return "signup";
+        }
+        if(password.length()<8){
+            model.addAttribute("error", "パスワードは8文字以上で設定してください");
+            return "signup";
+        }
         User newUser = new User();
         newUser.setUsername(username);
         newUser.setPassword(password);

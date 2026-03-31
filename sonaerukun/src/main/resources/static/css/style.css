@@ -201,8 +201,6 @@ button[onclick="addItem()"] {
 .manage-table td {
     padding: 8px 10px !important; font-size: 0.9rem;
 }
-
-/* QR & カメラ */
 #qrcode {
     padding: 10px; background: white; border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: inline-block;
@@ -219,8 +217,6 @@ button[onclick="addItem()"] {
     border: 2px solid rgba(255, 255, 255, 0.5); border-radius: 20px;
     pointer-events: none; 
 }
-
-/* レスポンシブ設定 */
 @media (max-width: 768px) {
     main { padding: 10px; }
     input[type="number"], input[type="text"], select {
@@ -230,4 +226,86 @@ button[onclick="addItem()"] {
     .grid-item { font-size: 0.85rem; padding: 10px; min-height: 44px; justify-content: flex-start; }
     .tab-btn { flex: 1; }
     .form-group label { font-size: 0.85rem; margin-bottom: 4px; }
+}
+.item-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+.item-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow);
+    border-left: 10px solid #cbd5e1; /* 初期色（グレー） */
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-top: 1px solid rgba(0,0,0,0.02);
+    border-right: 1px solid rgba(0,0,0,0.02);
+    border-bottom: 1px solid rgba(0,0,0,0.02);
+}
+
+.item-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.1);
+}
+.card-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.card-item-name {
+    font-size: 1.15rem !important;
+    font-weight: bold !important;
+    color: var(--primary-color) !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    width: 90% !important;
+}
+.card-item-date {
+    font-size: 0.85rem !important;
+    color: #64748b !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 4px 8px !important;
+    width: auto !important;
+    display: inline-block !important;
+}
+.card-delete-btn {
+    background: #fee2e2 !important;
+    color: #ef4444 !important;
+    border: none !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    font-weight: bold !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.2rem !important;
+    transition: all 0.2s !important;
+    flex-shrink: 0;
+}
+
+.card-delete-btn:hover {
+    background: #ef4444 !important;
+    color: white !important;
+}
+.status-danger-card { 
+    border-left-color: #ef4444 !important; 
+    background-color: #fff1f2 !important;
+}
+.status-warning-card { 
+    border-left-color: #f97316 !important; 
+    background-color: #fff7ed !important;
+}
+.status-safe-card { 
+    border-left-color: #22c55e !important; 
+    background-color: #f0fdf4 !important;
 }

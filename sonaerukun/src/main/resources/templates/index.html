@@ -150,21 +150,16 @@
 
        <section>
     <h2>🍞 備蓄品の期限管理</h2>
-    <div style="background: var(--light-green); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+    <div style="background: #f1f5f9; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <input type="text" id="new-item-name" placeholder="アイテム名（例：カンパン）" style="flex: 2; min-width: 150px;">
-            <input type="month" id="new-item-date" style="flex: 1; min-width: 130px;">
-            <button type="button" onclick="addItem()" style="background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold;">追加</button>
+            <input type="text" id="new-item-name" placeholder="アイテム名（例：水）" style="flex: 2; min-width: 150px; border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;">
+            <input type="month" id="new-item-date" style="flex: 1; min-width: 130px; border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;">
+            <button type="button" onclick="addItem()" style="background: #22c55e; color: white; border: none; padding: 10px 25px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s;">追加</button>
         </div>
     </div>
 
-    <table class="manage-table">
-        <thead>
-            <tr><th style="width: 50%;">アイテム名</th><th style="width: 35%;">賞味期限</th><th style="width: 15%;"></th></tr>
-        </thead>
-        <tbody id="expiry-list-body">
-            </tbody>
-    </table>
+    <div id="expiry-list-container" class="item-card-grid">
+        </div>
 </section>
         <section>
             <h2>📍 避難・連絡メモ</h2>
