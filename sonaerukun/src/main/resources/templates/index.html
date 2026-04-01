@@ -25,12 +25,6 @@
         <h3 style="font-size: 0.9rem; color: #64748b; margin: 0 0 10px 0; display: flex; align-items: center;">
             <span style="margin-right: 8px;">👥</span> つながっている家族
         </h3>
-        <div style="background: #fff3cd; padding: 10px; font-size: 0.7rem; color: #856404; border-radius: 8px; margin-bottom: 10px;">
-    DEBUG INFO: <br>
-    ログイン中: <span th:text="${UserName}"></span> <br>
-    検索キー(hostName): <span th:text="${session.hostName}"></span> <br>
-    見つかった家族数: <span th:text="${#lists.size(members)}"></span>人
-</div>
         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
             <div th:each="member : ${members}" 
                  style="background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; color: #334155; border: 1px solid #cbd5e1;">
@@ -59,32 +53,31 @@
                readonly style="background-color: #f1f5f9; color: #64748b; cursor: not-allowed;">
     </div>
 
-    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-        <div class="form-group" style="flex: 1;">
-            <label>👨 成人男性</label>
-            <input type="number" id="maleCount" name="maleCount" th:value="${param.maleCount ?: 0}" min="0" max="100" oninput="limitInput(this); updateTotalCount();">
-        </div>
-        <div class="form-group" style="flex: 1;">
-            <label>👩 成人女性</label>
-            <input type="number" id="femaleCount" name="femaleCount" th:value="${param.femaleCount ?: 0}" min="0" max="100" oninput="toggleHygieneArea(); limitInput(this); updateTotalCount();">
-        </div>
+   <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+    <div class="form-group" style="flex: 1;">
+        <label>👨 成人男性</label>
+        <input type="number" id="maleCount" name="maleCount" th:value="${param.maleCount}" placeholder="0" min="0" max="100" oninput="limitInput(this); updateTotalCount();">
     </div>
-
-    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <div class="form-group" style="flex: 1; min-width: 80px;">
-            <label>👦 子供</label>
-            <input type="number" id="childCount" name="childCount" th:value="${param.childCount ?: 0}" min="0" max="100" oninput="limitInput(this); updateTotalCount();">
-        </div>
-        <div class="form-group" style="flex: 1; min-width: 80px;">
-            <label>👶 乳幼児</label>
-            <input type="number" name="infantCount" th:value="${param.infantCount ?: 0}" min="0" max="100" oninput="limitInput(this); updateTotalCount();">
-        </div>
-        <div class="form-group" style="flex: 1; min-width: 80px;">
-            <label>🧓 高齢者</label>
-            <input type="number" name="seniorCount" th:value="${param.seniorCount ?: 0}" min="0" max="100" oninput="limitInput(this); updateTotalCount();">
-        </div>
+    <div class="form-group" style="flex: 1;">
+        <label>👩 成人女性</label>
+        <input type="number" id="femaleCount" name="femaleCount" th:value="${param.femaleCount}" placeholder="0" min="0" max="100" oninput="toggleHygieneArea(); limitInput(this); updateTotalCount();">
     </div>
+</div>
 
+<div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <div class="form-group" style="flex: 1; min-width: 80px;">
+        <label>👦 子供</label>
+        <input type="number" id="childCount" name="childCount" th:value="${param.childCount}" placeholder="0" min="0" max="100" oninput="limitInput(this); updateTotalCount();">
+    </div>
+    <div class="form-group" style="flex: 1; min-width: 80px;">
+        <label>👶 乳幼児</label>
+        <input type="number" name="infantCount" th:value="${param.infantCount}" placeholder="0" min="0" max="100" oninput="limitInput(this); updateTotalCount();">
+    </div>
+    <div class="form-group" style="flex: 1; min-width: 80px;">
+        <label>🧓 高齢者</label>
+        <input type="number" name="seniorCount" th:value="${param.seniorCount}" placeholder="0" min="0" max="100" oninput="limitInput(this); updateTotalCount();">
+    </div>
+</div>
     <div class="form-group">
         <label>⏳ 備蓄日数</label>
         <select name="days">
