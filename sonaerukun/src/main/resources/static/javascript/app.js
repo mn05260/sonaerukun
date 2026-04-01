@@ -180,29 +180,38 @@ function saveAllData() {
     }
 }
 window.onload = function() {
-    // ローカルのデータを表示
+    // 1. まずローカルの備蓄データを画面に出す（オフライン対策）
     const local = JSON.parse(localStorage.getItem('sonaerukun_v3_data') || '{}');
     if (local.items || local.memo) {
         reflectDataToUI(local);
     }
+
+    // 2. 「合言葉」の優先順位を整理する
     const syncInput = document.getElementById('sync-keyword');
-    const familyHostName = syncInput ? syncInput.value : ''; 
-    if (familyHostName && familyHostName !== '' && !familyHostName.includes('[[')) { 
-        currentKeyword = familyHostName;
-        localStorage.setItem('sonaerukun_keyword', familyHostName);
-        
-        observeData(); 
-        console.log("DBの合言葉で同期開始: " + familyHostName);
-    } else {
-        const savedKeyword = localStorage.getItem('sonaerukun_keyword');
-        if (savedKeyword) {
-            if (syncInput) syncInput.value = savedKeyword;
-            currentKeyword = savedKeyword;
-            observeData();
-            console.log("保存済みの合言葉で同期開始: " + savedKeyword);
-        }
+    // Java側からHTMLに埋め込まれた値をチェック
+    const serverKeyword = syncInput ? syncInput.value.trim() : ''; 
+    const localKeyword = localStorage.getItem('sonaerukun_keyword');
+
+    // 💡 司令塔の判断：サーバーの値を最優先、なければローカル
+    let finalKeyword = "";
+    
+    if (serverKeyword && serverKeyword !== '' && !serverKeyword.includes('[[')) {
+        finalKeyword = serverKeyword;
+        console.log("🌟 サーバーの合言葉を採用: " + finalKeyword);
+    } else if (localKeyword) {
+        finalKeyword = localKeyword;
+        if (syncInput) syncInput.value = finalKeyword;
+        console.log("💾 ローカルの合言葉を採用: " + finalKeyword);
     }
 
+    // 3. 最終的な合言葉があれば同期（Firebase監視）を開始
+    if (finalKeyword) {
+        currentKeyword = finalKeyword;
+        localStorage.setItem('sonaerukun_keyword', finalKeyword); // 常に最新を保存
+        observeData(); 
+    }
+
+    // その他の初期化
     updateTotalCount();
     checkAllInputs();
     sortItemsByDate();
@@ -258,14 +267,38 @@ window.onload = function() {
     }
 
     function updateTotalCount() {
-        const male = parseInt(document.getElementById('maleCount').value) || 0;
-        const female = parseInt(document.getElementById('femaleCount').value) || 0;
-        const child = parseInt(document.getElementById('childCount').value) || 0;
-        const infant = parseInt(document.getElementsByName('infantCount')[0].value) || 0;
-        const senior = parseInt(document.getElementsByName('seniorCount')[0].value) || 0;
-        document.getElementById('familyCount').value = male + female + child + infant + senior;
-        checkAllInputs();
+    // 1. 数値を取得
+    const male = parseInt(document.getElementById('maleCount')?.value) || 0;
+    const female = parseInt(document.getElementById('femaleCount')?.value) || 0;
+    const child = parseInt(document.getElementById('childCount')?.value) || 0;
+    
+    const infantElement = document.getElementsByName('infantCount')[0];
+    const seniorElement = document.getElementsByName('seniorCount')[0];
+    const infant = infantElement ? (parseInt(infantElement.value) || 0) : 0;
+    const senior = seniorElement ? (parseInt(seniorElement.value) || 0) : 0;
+
+    // 💡 修正ポイント①：ここで合計をしっかり計算して変数に入れる
+    const total = male + female + child + infant + senior;
+
+    // 💡 修正ポイント②：Java側に送るための「隠し箱」に数字を入れる
+    // これにより、Java側のランクA計算が今まで通り動きます
+    const hiddenFamilyCount = document.getElementById('familyCount');
+    if (hiddenFamilyCount) {
+        hiddenFamilyCount.value = total;
     }
+
+    // 💡 修正ポイント③：ボタンの文字を更新
+    const submitBtn = document.getElementById('submit-btn');
+    if (submitBtn) {
+        if (total > 0) {
+            submitBtn.innerText = `📜 ${total}名分のリストを作る`;
+        } else {
+            submitBtn.innerText = "📜 計算してリストを作る";
+        }
+    }
+
+    checkAllInputs();
+}
     function sortItemsByDate() {
     const container = document.getElementById('expiry-list-container');
     if (!container) return;
@@ -409,4 +442,12 @@ function findShelter() {
             maximumAge: 0            
         }
     );
+}
+function toggleFamilyStatus() {
+    const content = document.getElementById('family-detail-content');
+    const arrow = document.getElementById('family-arrow');
+    const isHidden = content.style.display === 'none';
+    
+    content.style.display = isHidden ? 'block' : 'none';
+    arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
 }

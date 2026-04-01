@@ -17,16 +17,43 @@ body {
     line-height: 1.6;
 }
 
+/* --- 修正後のスリムヘッダー --- */
 header {
-    text-align: center;
-    padding: 40px 20px;
+    display: flex;
+    justify-content: space-between; /* 左右に分散配置 */
+    align-items: center;
+    padding: 15px 25px; /* 高さを40pxから15pxに大幅縮小 */
     background: linear-gradient(135deg, #2d5a27, #4a7c44);
     color: white;
-    border-radius: 0 0 30px 30px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border-radius: 0 0 20px 20px; /* 角丸も少し控えめに */
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
 }
-header h1 { margin: 0; font-size: 2rem; letter-spacing: 2px; }
-header p { opacity: 0.9; margin: 8px 0 0 0; font-size: 0.9rem; }
+
+header h1 { 
+    margin: 0; 
+    font-size: 1.2rem; /* 2remから縮小。アプリ名として適切なサイズ */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 1px; 
+}
+
+header p { 
+    margin: 0; 
+    font-size: 0.85rem; 
+    opacity: 0.9; 
+    /* スローガンはHTML側で消すのがベストですが、CSS側でも調整 */
+}
+
+/* モバイル対応：スマホで見ても1行に収まるように */
+@media (max-width: 480px) {
+    header {
+        padding: 10px 15px;
+    }
+    header h1 {
+        font-size: 1.1rem;
+    }
+}
 
 main { max-width: 650px; margin: -20px auto 40px; padding: 0 15px; }
 
@@ -51,7 +78,7 @@ main { max-width: 650px; margin: -20px auto 40px; padding: 0 15px; }
 
 section {
     background: var(--card-bg); border-radius: 24px;
-    padding: 30px; /* 24pxから微増させ、入力画面での余白を最適化 */
+    padding: 40px; /* 24pxから微増させ、入力画面での余白を最適化 */
     margin-bottom: 20px;
     box-shadow: var(--shadow);
     border: 1px solid rgba(0,0,0,0.02);
@@ -60,7 +87,7 @@ section {
 h2 { font-size: 1.25rem; margin-top: 0; color: var(--primary-color); display: flex; align-items: center; gap: 10px; }
 
 /* フォーム要素 */
-.form-group { margin-bottom: 20px; text-align: left; } /* text-align: leftを追加 */
+.form-group { margin-bottom: 28px; text-align: left; } /* text-align: leftを追加 */
 label { display: block; font-weight: bold; margin-bottom: 8px; color: #475569; font-size: 0.95rem; }
 
 input, select, textarea {
