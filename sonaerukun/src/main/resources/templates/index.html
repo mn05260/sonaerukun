@@ -170,11 +170,14 @@
             <div class="form-group">
                 <label>🤝 集合ルール</label>
                 <textarea id="family-rule" placeholder="例：夕方17時に正門前で待ち合わせ" onchange="saveAllData()" style="min-height: 80px;"></textarea>
-            </div>
             <div class="form-group">
                 <label>📞 緊急連絡先</label>
                 <input type="tel" id="emergency-tel" placeholder="例：090-xxxx-xxxx（父）" onchange="saveAllData()">
             </div>
+                <button type="button" onclick="findShelter()"
+            style="width: 100%; margin-bottom: 10px; background: #2d5a27; color: white; padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <span>📍</span> 現在地近くの避難所を検索
+    </button>
         </section>
         <div class="sync-section">
     <h3>🔗 家族とリアルタイム共有</h3>
@@ -182,7 +185,7 @@
         合言葉を決めて同期するか、<br>QRコードを家族に見せて読み取ってもらいましょう。
     </p>
     
-    <input type="text" id="sync-keyword" placeholder="家族共通の合言葉" style="text-align: center; margin-top: 10px;">
+  <input type="text" id="sync-keyword" th:value="${hostName}" placeholder="家族の合言葉">
     
     <div style="display: flex; gap: 10px; margin-top: 15px;">
         <button type="button" class="sync-btn" style="flex: 1;" onclick="startSync()">合言葉で同期</button>

@@ -57,6 +57,8 @@ public String login(@RequestParam String username, @RequestParam String password
         model.addAttribute("members", members);
         
         model.addAttribute("UserName", username);
+        //合言葉をHTMLに渡す
+        model.addAttribute("hostName", hostName);
         return "index";
     }
 

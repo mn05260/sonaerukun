@@ -151,7 +151,6 @@ function saveAllData() {
             alert("新しいグループを作成しました！");
         }
         observeData();
-        location.reload(); 
     })
     .catch(error => {
         console.error("同期中にエラーが発生しました:", error);
@@ -180,27 +179,27 @@ function saveAllData() {
         document.getElementById('emergency-tel').value = data.memo.tel || '';
     }
 }
-
-    // ページ読み込み時の処理
-    window.onload = function() {
-    // 1. まずローカルのデータを表示
+window.onload = function() {
+    // ローカルのデータを表示
     const local = JSON.parse(localStorage.getItem('sonaerukun_v3_data') || '{}');
     if (local.items || local.memo) {
         reflectDataToUI(local);
     }
-    const familyHostName = "[[${session.hostName}]]"; 
-    
-   if (familyHostName && familyHostName !== '') { 
+    const syncInput = document.getElementById('sync-keyword');
+    const familyHostName = syncInput ? syncInput.value : ''; 
+    if (familyHostName && familyHostName !== '' && !familyHostName.includes('[[')) { 
         currentKeyword = familyHostName;
-        document.getElementById('sync-keyword').value = familyHostName;
-        observeData(); // 自動でFirebaseの監視を開始
+        localStorage.setItem('sonaerukun_keyword', familyHostName);
+        
+        observeData(); 
         console.log("DBの合言葉で同期開始: " + familyHostName);
     } else {
         const savedKeyword = localStorage.getItem('sonaerukun_keyword');
         if (savedKeyword) {
-            document.getElementById('sync-keyword').value = savedKeyword;
+            if (syncInput) syncInput.value = savedKeyword;
             currentKeyword = savedKeyword;
             observeData();
+            console.log("保存済みの合言葉で同期開始: " + savedKeyword);
         }
     }
 
@@ -370,4 +369,44 @@ function stopCamera() {
         videoStream = null;
     }
     document.getElementById("camera-section").style.display = "none";
+}
+function findShelter() {
+    // 1. 位置情報が使えるかチェック
+    if (!navigator.geolocation) {
+        alert("お使いのブラウザは位置情報に対応していません。");
+        return;
+    }
+    console.log("位置情報を取得中...");
+
+    // 2. 現在地を取得
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const lat = position.coords.latitude;  // 緯度
+            const lng = position.coords.longitude; // 経度
+            const url = `https://www.google.co.jp/maps/search/避難所/@${lat},${lng},15z`;
+            window.open(url, '_blank');
+        },
+        (error) => {
+            // エラーハンドリング
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    alert("位置情報の利用が許可されませんでした。設定から許可してください。");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert("現在地を取得できませんでした。");
+                    break;
+                case error.TIMEOUT:
+                    alert("タイムアウトしました。再度お試しください。");
+                    break;
+                default:
+                    alert("エラーが発生しました。");
+                    break;
+            }
+        },
+        {
+            enableHighAccuracy: true, 
+            timeout: 5000,           
+            maximumAge: 0            
+        }
+    );
 }
