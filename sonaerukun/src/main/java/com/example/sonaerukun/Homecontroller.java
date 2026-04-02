@@ -95,6 +95,7 @@ public String login(@RequestParam String username, @RequestParam String password
     }
    @PostMapping("/calculate")
 public String calculate(
+        @RequestParam("prefecture") String prefecture, // ★追加：都道府県を受け取る
         @RequestParam("familyCount") int familyCount,
         @RequestParam("maleCount") int maleCount,  
         @RequestParam("femaleCount") int femaleCount,
@@ -106,7 +107,6 @@ public String calculate(
         HttpSession session, 
         Model model) {
     
-    
     String username = (String) session.getAttribute("userName");
     String hostName = (String) session.getAttribute("hostName");
     if (username == null) return "redirect:/";
@@ -115,15 +115,20 @@ public String calculate(
     List<User> members = userRepository.findByHostName(hostName);
     model.addAttribute("members", members);
 
-    
+    // ★修正：第1引数に prefecture を追加
     SonaeruLogic.PreparednessResult result = sonaeruLogic.calculate(
-            familyCount, maleCount, femaleCount, childCount, infantCount, seniorCount, days, napkinLevel); 
+            prefecture, familyCount, maleCount, femaleCount, childCount, infantCount, seniorCount, days, napkinLevel); 
     
+    // 結果を画面に渡す
     model.addAttribute("rankA", result.rankA);
     model.addAttribute("rankB", result.rankB);
     model.addAttribute("rankC", result.rankC);
     model.addAttribute("storageInfo", result.storageInfo);
     model.addAttribute("UserName", username);
+    model.addAttribute("selectedPref", prefecture); // 画面に「〇〇県の計算結果」と出すならこれも便利
+    
+    // 合言葉を渡すのを忘れずに（既存のindex表示に合わせる）
+    model.addAttribute("hostName", hostName);
     
     return "index";
 }
