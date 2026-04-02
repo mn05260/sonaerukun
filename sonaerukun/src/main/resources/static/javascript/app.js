@@ -123,6 +123,54 @@ function saveAllData() {
         database.ref('users/' + currentKeyword).set(allData);
     }
 }
+function generateStrongKeyword() {
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < 10; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+        if ((i + 1) % 4 === 0 && i < 9) result += "-";
+    }
+    
+    const input = document.getElementById('sync-keyword');
+    if (input) {
+        input.value = result;
+        currentKeyword = result; // 💡 変数にセット
+        localStorage.setItem('sonaerukun_keyword', result); // 💡 ローカルに保存
+        
+        // 💡 QR表示も更新しつつ、Firebaseに今のデータを保存（これで自分のグループが確定）
+        showSyncQR(); 
+        saveAllData(); 
+        observeData(); // データの監視も開始
+        
+        alert("新しい合言葉を発行し、家族グループを作成しました！\nこのまま下のボタンでLINEに送れます。");
+    }
+}
+
+// 💡 LINE連携：メッセージを組み立ててLINEを起動
+function shareToLine() {
+    const keyword = document.getElementById('sync-keyword').value;
+    if (!keyword) {
+        alert("先に「新しく合言葉を作る」を押してくださいね！");
+        return;
+    }
+
+    const message = `【防災アプリ ソナエルくん】\n家族の合言葉は「 ${keyword} 」です。\nアプリの「期限・共有」タブからこの合言葉を入力してね！`;
+    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(message)}`;
+    
+    window.open(lineUrl, '_blank');
+}
+
+// 💡 クリップボードへの「1タップコピー」
+function copyKeyword() {
+    const keyword = document.getElementById('sync-keyword');
+    if (!keyword.value) return;
+    
+    keyword.select();
+    keyword.setSelectionRange(0, 99999); // スマホ対策
+    navigator.clipboard.writeText(keyword.value);
+    
+    alert("コピーしました！LINEやメールに貼り付けられます。");
+}
    function startSync() {
     const keyword = document.getElementById('sync-keyword').value.trim();
     if (!keyword) return alert("合言葉を入力してください");
