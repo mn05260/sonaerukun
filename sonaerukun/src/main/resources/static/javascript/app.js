@@ -339,9 +339,11 @@ function showSyncQR(){
     if(area) area.style.display = 'flex';
     const qrContainer = document.getElementById("qrcode");
     qrContainer.innerHTML = "";
+    const currentOrigin = window.location.origin;
+    const syncUrl = '${currentOrigin}/?hostName=${encodeURIComponent(keyword)}';
     //QRコードを作成
     new QRCode(qrContainer, {
-        text: "http://localhost:8081/signup?hostName=" + keyword,
+        text: syncUrl,
         width:160,
         height:160,
         colorDark:"#2d5a27",
@@ -379,18 +381,36 @@ function tick() {
         canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
         
         const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
-        // 2. QRコードを解析
         const code = jsQR(imageData.data, imageData.width, imageData.height, {
             inversionAttempts: "dontInvert",
         });
 
         if (code) {
-            // 3. 見つかったら合言葉をセットして終了
-            document.getElementById("sync-keyword").value = code.data;
-            alert("同期キーを読み込みました！：「" + code.data + "」");
+            // --- 💡 ここから修正ポイント ---
+            let finalKeyword = code.data;
+
+            // 読み取ったデータがURL形式かチェックする
+            if (code.data.startsWith("http")) {
+                try {
+                    const url = new URL(code.data);
+                    const params = new URLSearchParams(url.search);
+                    const hostName = params.get('hostName'); // ?hostName=〇〇 を探す
+                    if (hostName) {
+                        finalKeyword = hostName; // 合言葉だけを抽出
+                    }
+                } catch (e) {
+                    console.error("URL解析エラー:", e);
+                }
+            }
+
+            // 抽出した合言葉（または元のデータ）をセット
+            document.getElementById("sync-keyword").value = finalKeyword;
+            alert("同期キーを読み込みました！：「" + finalKeyword + "」");
+            
             stopCamera();
-            startSync(); // そのまま同期実行
+            startSync(); 
             return;
+            // --- 💡 ここまで ---
         }
     }
     if (videoStream) requestAnimationFrame(tick);
