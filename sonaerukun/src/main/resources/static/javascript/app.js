@@ -1,4 +1,4 @@
-    // --- Firebase設定 ---
+   // --- Firebase設定 ---
     const firebaseConfig = {
         apiKey: "AIzaSyA1MU0XeeE1CxUP2dg-qeqBk2zOSHeph6-hg",
         authDomain: "sonaerukun-0526.firebaseapp.com",
@@ -471,4 +471,25 @@ function toggleFamilyStatus() {
     
     content.style.display = isHidden ? 'block' : 'none';
     arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+// 手入力エリアの表示・非表示切り替え
+function toggleManualInput() {
+    const area = document.getElementById('manual-input-area');
+    if (area.style.display === 'none') {
+        area.style.display = 'block';
+    } else {
+        area.style.display = 'none';
+    }
+}
+
+// 合言葉のコピー機能
+function copyKeyword() {
+    const key = document.getElementById('sync-keyword').value;
+    if (!key) return alert("合言葉を入力してください");
+    
+    navigator.clipboard.writeText(key).then(() => {
+        alert("合言葉「" + key + "」をコピーしました！LINEなどで家族に送ってください。");
+    }).catch(err => {
+        console.error("コピー失敗", err);
+    });
 }

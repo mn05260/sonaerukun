@@ -172,31 +172,49 @@
         <span>📍</span> 現在地近くの避難所を検索
     </button>
         </section>
-        <div class="sync-section">
-    <h3>🔗 家族とリアルタイム共有</h3>
-    <p style="font-size: 0.85rem; color: #64748b;">
-        合言葉を決めて同期するか、<br>QRコードを家族に見せて読み取ってもらいましょう。
-    </p>
+    <div class="sync-section card" style="background: #fff; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; margin-top: 20px;">
+    <h3 style="margin-top: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+        👨‍👩‍👧‍👦 家族とデータを共有
+    </h3>
     
-  <input type="text" id="sync-keyword" th:value="${hostName}" placeholder="家族の合言葉">
+    <button type="button" class="btn-primary-lg" onclick="startCamera()" 
+        style="width: 100%; padding: 16px; background: #2d5a27; color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        📷 QRコードをスキャンして参加
+    </button>
+
+    <div id="camera-section" style="display: none; text-align: center; margin-bottom: 15px;">
+        <video id="video" style="width: 100%; max-width: 300px; border-radius: 12px; border: 2px solid #2d5a27;"></video>
+        <canvas id="canvas" style="display: none;"></canvas>
+        <button type="button" class="sync-btn" style="background: #ef4444; width: 100%; margin-top: 10px;" onclick="stopCamera()">キャンセル</button>
+    </div>
+
+    <div class="divider" style="text-align: center; margin: 15px 0; border-bottom: 1px solid #e2e8f0; line-height: 0.1em;">
+        <span style="background: #fff; padding: 0 10px; color: #94a3b8; font-size: 0.8rem;">または</span>
+    </div>
+
+    <div class="my-keyword-area">
+        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 8px; text-align: center;">自分の合言葉を見せる・送る</p>
+        <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+            <input type="text" id="sync-keyword" th:value="${hostName}" placeholder="合言葉を決める" style="flex: 1; margin: 0; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
+            <button type="button" onclick="copyKeyword()" style="padding: 0 12px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer;">📋</button>
+        </div>
+        <button type="button" class="sync-btn" style="width: 100%; background: #64748b; color: white; padding: 10px; border: none; border-radius: 8px; cursor: pointer;" onclick="showSyncQR()">QRコードを表示する</button>
+    </div>
+
+    <div class="manual-input-link" style="text-align: center; margin-top: 15px;">
+        <a href="javascript:void(0)" onclick="toggleManualInput()" style="font-size: 0.8rem; color: #94a3b8; text-decoration: none;">合言葉を手動で入力する場合 ▾</a>
+    </div>
     
-    <div style="display: flex; gap: 10px; margin-top: 15px;">
-        <button type="button" class="sync-btn" style="flex: 1;" onclick="startSync()">合言葉で同期</button>
-        <button type="button" class="sync-btn" style="flex: 1; background: #64748b;" onclick="showSyncQR()">QRを表示</button>
+    <div id="manual-input-area" style="display: none; margin-top: 10px; border-top: 1px dashed #e2e8f0; padding-top: 10px;">
+        <button type="button" class="sync-btn" style="width: 100%; background: #22c55e; color: white; padding: 10px; border: none; border-radius: 8px; cursor: pointer;" onclick="startSync()">この合言葉で同期を開始</button>
     </div>
 
     <div id="qrcode-area" style="margin-top: 20px; display: flex; flex-direction: column; align-items: center; display: none;">
         <div id="qrcode"></div>
         <p style="font-size: 0.75rem; color: #ef4444; margin-top: 10px;">家族にこのコードを写してもらってください</p>
     </div>
-</div>
+</div>   
     </div>
-    <div id="camera-section" style="display: none; text-align: center; margin-top: 20px;">
-    <video id="video" style="width: 100%; max-width: 300px; border-radius: 12px; border: 2px solid var(--primary-color);"></video>
-    <canvas id="canvas" style="display: none;"></canvas> <button type="button" class="sync-btn" style="background: #ef4444;" onclick="stopCamera()">キャンセル</button>
-</div>
-
-<button type="button" class="sync-btn" style="margin-top: 10px; background: #3b82f6;" onclick="startCamera()">QRを読み取る</button>
 </main>
 
 <script th:inline="javascript">

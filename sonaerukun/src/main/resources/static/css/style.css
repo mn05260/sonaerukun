@@ -336,3 +336,85 @@ button[onclick="addItem()"] {
     border-left-color: #22c55e !important; 
     background-color: #f0fdf4 !important;
 }
+/* --- 家族共有UIの追加スタイル --- */
+
+/* 1. QRスキャン用の大きなボタン */
+.btn-primary-lg {
+    width: 100%;
+    padding: 18px;
+    background: var(--primary-color); /* 定義済みの深い緑 */
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(45, 90, 39, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: transform 0.1s, background-color 0.2s;
+}
+
+.btn-primary-lg:active {
+    transform: scale(0.98);
+}
+
+.btn-primary-lg:hover {
+    background-color: #3d7a35; /* 少し明るい緑 */
+}
+
+/* 2. 区切り線（または） */
+.divider {
+    text-align: center;
+    margin: 25px 0;
+    border-bottom: 1px solid #e2e8f0;
+    line-height: 0.1em;
+}
+
+.divider span {
+    background: #fff; /* 背景色に合わせて調整 */
+    padding: 0 15px;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+/* 3. 合言葉入力エリアの微調整 */
+.my-keyword-area input#sync-keyword {
+    margin: 0;
+    font-family: monospace; /* 合言葉を見やすく */
+    letter-spacing: 1px;
+    background: #f8fafc;
+}
+
+/* 4. 手入力リンク（ナッジ） */
+.manual-input-link a {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.manual-input-link a:hover {
+    background-color: #f1f5f9;
+    color: var(--primary-color) !important;
+}
+
+/* 5. カメラセクションの微調整（既存の上書き） */
+#camera-section {
+    background: #1a1a1a;
+    padding: 10px;
+    border: 2px solid var(--primary-color);
+}
+
+/* コピーボタンのアイコン調整 */
+button[onclick="copyKeyword()"] {
+    transition: background-color 0.2s;
+    font-size: 1.2rem;
+}
+
+button[onclick="copyKeyword()"]:active {
+    background-color: #e2e8f0 !important;
+}
