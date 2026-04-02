@@ -334,18 +334,22 @@ function showRank(rankName, e) {
 function showSyncQR(){
     const keyword = document.getElementById('sync-keyword').value;
     if(!keyword) return alert("合言葉を入力してください");
-    //QRコードを表示する場所を指定する
+    
     const area = document.getElementById('qrcode-area');
     if(area) area.style.display = 'flex';
+    
     const qrContainer = document.getElementById("qrcode");
     qrContainer.innerHTML = "";
+    
+    // 💡 window.location.origin を使うことで、RenderでもPCでも自動でURLが切り替わります
     const currentOrigin = window.location.origin;
-    const syncUrl = '${currentOrigin}/?hostName=${encodeURIComponent(keyword)}';
-    //QRコードを作成
+    // 💡 必ず バッククォート ` で囲んでください
+    const syncUrl = `${currentOrigin}/?hostName=${encodeURIComponent(keyword)}`;
+    
     new QRCode(qrContainer, {
         text: syncUrl,
-        width:160,
-        height:160,
+        width: 160,
+        height: 160,
         colorDark:"#2d5a27",
         colorLight:"#ffffff",
         correctLevel: QRCode.CorrectLevel.H
@@ -386,7 +390,6 @@ function tick() {
         });
 
         if (code) {
-            // --- 💡 ここから修正ポイント ---
             let finalKeyword = code.data;
 
             // 読み取ったデータがURL形式かチェックする
@@ -402,8 +405,6 @@ function tick() {
                     console.error("URL解析エラー:", e);
                 }
             }
-
-            // 抽出した合言葉（または元のデータ）をセット
             document.getElementById("sync-keyword").value = finalKeyword;
             alert("同期キーを読み込みました！：「" + finalKeyword + "」");
             
