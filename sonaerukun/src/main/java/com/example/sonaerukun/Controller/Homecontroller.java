@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.example.sonaerukun.Controller.SonaeruLogic.PreparednessResult;
+import com.example.sonaerukun.Service.SonaeruLogic;
 import com.example.sonaerukun.model.User;
 import com.example.sonaerukun.repository.UserRepository;
 
