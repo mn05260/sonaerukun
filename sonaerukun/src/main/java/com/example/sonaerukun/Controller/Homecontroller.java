@@ -1,16 +1,18 @@
-package com.example.sonaerukun;
+package com.example.sonaerukun.Controller;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean; // ★追加
-import org.springframework.security.config.annotation.web.builders.HttpSecurity; // ★追加
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // ★追加
-import org.springframework.security.web.SecurityFilterChain; // ★追加
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.example.sonaerukun.Controller.SonaeruLogic.PreparednessResult;
+import com.example.sonaerukun.model.User;
+import com.example.sonaerukun.repository.UserRepository;
+
 import java.util.Optional;
 import java.util.List; 
 

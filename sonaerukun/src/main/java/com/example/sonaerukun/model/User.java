@@ -1,4 +1,4 @@
-package com.example.sonaerukun;
+package com.example.sonaerukun.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

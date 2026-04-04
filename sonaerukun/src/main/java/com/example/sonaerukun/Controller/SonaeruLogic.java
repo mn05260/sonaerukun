@@ -1,4 +1,4 @@
-package com.example.sonaerukun;
+package com.example.sonaerukun.Controller;
 import org.springframework.stereotype.Service;
 
 @Service
