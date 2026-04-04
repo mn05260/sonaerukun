@@ -1,6 +1,11 @@
 package com.example.sonaerukun;
+
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean; // ★追加
+import org.springframework.security.config.annotation.web.builders.HttpSecurity; // ★追加
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // ★追加
+import org.springframework.security.web.SecurityFilterChain; // ★追加
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +23,10 @@ public class Homecontroller {
     @Autowired
     private UserRepository userRepository;
 
+   
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
     @GetMapping("/")
     public String index() {
         return "login";
@@ -34,8 +43,14 @@ public String login(@RequestParam String username, @RequestParam String password
     
     Optional<User> userOpt = userRepository.findById(username);
     
-    if (userOpt.isPresent() && userOpt.get().getPassword().equals(password)) {
-        User user = userOpt.get(); // Optionalから中身を取り出す
+    // ★修正：passwordEncoder.matches を使うように変更（それ以外はそのまま）
+    if (userOpt.isPresent() && passwordEncoder.matches(password, userOpt.get().getPassword())) {
+        User user = userOpt.get(); 
+        if (!user.isEnabled()) { 
+            model.addAttribute("error", "このアカウントは現在停止されています。管理者にお問い合わせください。");
+            return "login";
+        }
+
         session.setAttribute("userName", username); 
         session.setAttribute("hostName", user.getHostName()); 
         
@@ -47,31 +62,37 @@ public String login(@RequestParam String username, @RequestParam String password
 }
 
     @GetMapping("/index")
-    public String showIndex(HttpSession session, Model model) {
-        String username = (String) session.getAttribute("userName");
-        String hostName = (String) session.getAttribute("hostName"); // ★追加
-        
-        if (username == null) return "redirect:/"; 
-        
-        List<User> members = userRepository.findByHostName(hostName);
-        model.addAttribute("members", members);
-        
-        model.addAttribute("UserName", username);
-        //合言葉をHTMLに渡す
-        model.addAttribute("hostName", hostName);
-        return "index";
+public String showIndex(HttpSession session, Model model) {
+    String username = (String) session.getAttribute("userName");
+    if (username == null) return "redirect:/"; 
+    User user = userRepository.findById(username).orElse(null);
+    if (user == null) return "redirect:/";
+    if (user.getJoinCode() == null || user.getJoinCode().isEmpty()) {
+        //  ここでランダムな10文字を作る（自作のメソッドを呼ぶか直接書く）
+        String newCode = java.util.UUID.randomUUID().toString().substring(0, 10);
+        user.setJoinCode(newCode);
+        userRepository.save(user); // DBに永続保存！
     }
+    String hostName = user.getHostName();
+    List<User> members = userRepository.findByHostName(hostName);
+    
+    model.addAttribute("members", members);
+    model.addAttribute("UserName", username);
+    model.addAttribute("hostName", hostName);
+    model.addAttribute("joinCode", user.getJoinCode()); // ★HTML側に「保存されたコード」を渡す
+
+    return "index";
+}
 
     @GetMapping("/signup")
     public String signupForm(@RequestParam(required = false)String hostName, Model model) {
         model.addAttribute("hostName", hostName);
         return "signup";
-
     }
 
     @PostMapping("/signup")
     public String signup(@RequestParam String username, @RequestParam String password, 
-                        @RequestParam(name = "hostName", required = false) String hostName, Model model) { // ★QRコード等から受け取る想定
+                        @RequestParam(name = "hostName", required = false) String hostName, Model model) { 
         if(userRepository.existsById(username)){
             model.addAttribute("error", "このユーザー名は既に存在しています");
             return "signup";
@@ -82,20 +103,22 @@ public String login(@RequestParam String username, @RequestParam String password
         }
         User newUser = new User();
         newUser.setUsername(username);
-        newUser.setPassword(password);
+        
+        // ★修正：保存するパスワードをハッシュ化（それ以外はそのまま）
+        newUser.setPassword(passwordEncoder.encode(password));
+
         if(hostName == null ||hostName.isEmpty()){
-            //QR経由じゃない場合は、自分の名前をホスト名にする
             newUser.setHostName(username);
         } else{
-            //QR経由の場合は、送られてきたホスト名を設定する
             newUser.setHostName(hostName);
         }
         userRepository.save(newUser);
         return "redirect:/";
     }
+
    @PostMapping("/calculate")
 public String calculate(
-        @RequestParam("prefecture") String prefecture, // ★追加：都道府県を受け取る
+        @RequestParam("prefecture") String prefecture, 
         @RequestParam("familyCount") int familyCount,
         @RequestParam("maleCount") int maleCount,  
         @RequestParam("femaleCount") int femaleCount,
@@ -111,48 +134,45 @@ public String calculate(
     String hostName = (String) session.getAttribute("hostName");
     if (username == null) return "redirect:/";
 
-    // 家族メンバーのリストを取得
     List<User> members = userRepository.findByHostName(hostName);
     model.addAttribute("members", members);
 
-    // ★修正：第1引数に prefecture を追加
     SonaeruLogic.PreparednessResult result = sonaeruLogic.calculate(
             prefecture, familyCount, maleCount, femaleCount, childCount, infantCount, seniorCount, days, napkinLevel); 
     
-    // 結果を画面に渡す
     model.addAttribute("rankA", result.rankA);
     model.addAttribute("rankB", result.rankB);
     model.addAttribute("rankC", result.rankC);
     model.addAttribute("storageInfo", result.storageInfo);
     model.addAttribute("UserName", username);
-    model.addAttribute("selectedPref", prefecture); // 画面に「〇〇県の計算結果」と出すならこれも便利
-    
-    // 合言葉を渡すのを忘れずに（既存のindex表示に合わせる）
+    model.addAttribute("selectedPref", prefecture); 
     model.addAttribute("hostName", hostName);
     
     return "index";
 }
+
 @PostMapping("/joinFamily")
 public String joinFamily(@RequestParam String keyword, HttpSession session) {
 
     String username = (String) session.getAttribute("userName");
     if (username == null) return "redirect:/";
 
-    // 今ログインしてるユーザー取得
     User user = userRepository.findById(username).orElse(null);
     if (user != null) {
-        user.setHostName(keyword); // ← 合言葉をhostNameにセット
-        userRepository.save(user); // ← DB更新
+        user.setHostName(keyword); 
+        userRepository.save(user); 
     }
     session.setAttribute("hostName", keyword);
 
     return "redirect:/index";
 }
+
 @GetMapping("/debug")
 public String debug() {
     List<User> users = userRepository.findAll();
     for (User u : users) {
-        System.out.println("ユーザー: " + u.getUsername() + " / hostName: " + u.getHostName());
+        // ★修正：デバッグで見やすいように文言だけ少し調整
+        System.out.println("ユーザー: " + u.getUsername() + " / パスワード(ハッシュ): " + u.getPassword());
     }
     return "login"; 
 }

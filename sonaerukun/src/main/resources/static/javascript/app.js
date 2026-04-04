@@ -134,27 +134,26 @@ function generateStrongKeyword() {
     const input = document.getElementById('sync-keyword');
     if (input) {
         input.value = result;
-        currentKeyword = result; // 💡 変数にセット
-        localStorage.setItem('sonaerukun_keyword', result); // 💡 ローカルに保存
-        
-        // 💡 QR表示も更新しつつ、Firebaseに今のデータを保存（これで自分のグループが確定）
+        currentKeyword = result;
+        localStorage.setItem('sonaerukun_keyword', result);
+        fetch('/joinFamily?keyword=' + encodeURIComponent(result), { method: 'POST' });
+
         showSyncQR(); 
         saveAllData(); 
-        observeData(); // データの監視も開始
+        observeData(); 
         
-        alert("新しい合言葉を発行し、家族グループを作成しました！\nこのまま下のボタンでLINEに送れます。");
+        alert("新しい合言葉を発行しました！");
     }
 }
 
 // 💡 LINE連携：メッセージを組み立ててLINEを起動
 function shareToLine() {
     const keyword = document.getElementById('sync-keyword').value;
-    if (!keyword) {
-        alert("先に「新しく合言葉を作る」を押してくださいね！");
-        return;
-    }
+    if (!keyword) return alert("合言葉がありません");
+    const baseUrl = window.location.origin; 
+    const shareUrl = `${baseUrl}/signup?hostName=${encodeURIComponent(keyword)}`;
 
-    const message = `【防災アプリ ソナエルくん】\n家族の合言葉は「 ${keyword} 」です。\nアプリの「期限・共有」タブからこの合言葉を入力してね！`;
+    const message = `【ソナエルくん】\n家族グループへの招待です！\n下のリンクから登録して参加してね！\n\n${shareUrl}\n\n合言葉: ${keyword}`;
     const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(message)}`;
     
     window.open(lineUrl, '_blank');
@@ -228,38 +227,29 @@ function copyKeyword() {
     }
 }
 window.onload = function() {
-    // 1. まずローカルの備蓄データを画面に出す（オフライン対策）
     const local = JSON.parse(localStorage.getItem('sonaerukun_v3_data') || '{}');
-    if (local.items || local.memo) {
-        reflectDataToUI(local);
-    }
-
-    // 2. 「合言葉」の優先順位を整理する
+    if (local.items || local.memo) reflectDataToUI(local);
     const syncInput = document.getElementById('sync-keyword');
-    // Java側からHTMLに埋め込まれた値をチェック
-    const serverKeyword = syncInput ? syncInput.value.trim() : ''; 
-    const localKeyword = localStorage.getItem('sonaerukun_keyword');
-
-    // 💡 司令塔の判断：サーバーの値を最優先、なければローカル
-    let finalKeyword = "";
     
-    if (serverKeyword && serverKeyword !== '' && !serverKeyword.includes('[[')) {
-        finalKeyword = serverKeyword;
-        console.log("🌟 サーバーの合言葉を採用: " + finalKeyword);
-    } else if (localKeyword) {
-        finalKeyword = localKeyword;
-        if (syncInput) syncInput.value = finalKeyword;
-        console.log("💾 ローカルの合言葉を採用: " + finalKeyword);
-    }
+    // Javaの model.addAttribute("joinCode", ...) から届いた値
+    const serverKeyword = syncInput ? syncInput.value.trim() : ''; 
 
-    // 3. 最終的な合言葉があれば同期（Firebase監視）を開始
-    if (finalKeyword) {
-        currentKeyword = finalKeyword;
-        localStorage.setItem('sonaerukun_keyword', finalKeyword); // 常に最新を保存
+    if (serverKeyword && serverKeyword !== '' && serverKeyword !== '未発行') {
+        currentKeyword = serverKeyword;
+        localStorage.setItem('sonaerukun_keyword', serverKeyword);
+        console.log("✅ DBから取得した合言葉で同期開始: " + serverKeyword);
+    } else {
+        const localKeyword = localStorage.getItem('sonaerukun_keyword');
+        if (localKeyword) {
+            currentKeyword = localKeyword;
+            if (syncInput) syncInput.value = localKeyword;
+        }
+    }
+    if (currentKeyword) {
         observeData(); 
+        showSyncQR(); // ついでにQRも出しちゃう
     }
 
-    // その他の初期化
     updateTotalCount();
     checkAllInputs();
     sortItemsByDate();
@@ -531,12 +521,19 @@ function toggleManualInput() {
 }
 
 // 合言葉のコピー機能
-function copyKeyword() {
-    const key = document.getElementById('sync-keyword').value;
-    if (!key) return alert("合言葉を入力してください");
+function copyKeyword(btn) {
+    const keywordInput = document.getElementById('sync-keyword');
+    if (!keywordInput || !keywordInput.value) return;
     
-    navigator.clipboard.writeText(key).then(() => {
-        alert("合言葉「" + key + "」をコピーしました！LINEなどで家族に送ってください。");
+    // クリップボードにコピー
+    navigator.clipboard.writeText(keywordInput.value).then(() => {
+        // ボタンの見た目を変える（📋 から ✅ へ）
+        const originalIcon = btn.innerText;
+        btn.innerText = "✅";
+        setTimeout(() => {
+            btn.innerText = originalIcon;
+        }, 2000);
+        console.log("コピー成功: " + keywordInput.value);
     }).catch(err => {
         console.error("コピー失敗", err);
     });

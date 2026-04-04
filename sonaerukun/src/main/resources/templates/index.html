@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>防災グッズ計算アプリ | ソナエルくん</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
-    
+
     <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-database-compat.js"></script>
 <link rel="stylesheet" th:href="@{/css/style.css}">
@@ -21,7 +21,7 @@
 </header>
 
 <main style="margin-top: 10px;"> <div id="family-status-area" style="margin-bottom: 15px; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden;">
-        
+
         <div onclick="toggleFamilyStatus()" style="padding: 10px 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
             <h3 style="font-size: 0.85rem; color: #64748b; margin: 0;">
                 👥 つながっている家族
@@ -49,6 +49,7 @@
         <form action="/calculate" method="post">
             <section>
     <h2>🏠 家族構成の入力</h2>
+
 <div class="form-group">
     <label for="prefecture">📍 お住まいの地域（オプション）</label>
     <p class="small text-muted">地域特有のリスクに合わせたアイテムを追加します。</p>
@@ -172,7 +173,7 @@
 </div>
 </div>
 <div id="manage-content" style="display: none;">
-   
+
 
        <section>
     <h2>🍞 備蓄品の期限管理</h2>
@@ -209,18 +210,18 @@
     <h3 style="margin-top: 0; font-size: 1.15rem; display: flex; align-items: center; gap: 10px; color: var(--primary-color);">
         👪 家族に合言葉を教える
     </h3>
-    
+
     <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">
         強固な合言葉を発行して、家族のLINEに送るだけで共有が完了します。
     </p>
 
     <div class="my-keyword-area">
         <label style="font-size: 0.85rem; color: #475569; display: block; margin-bottom: 8px; font-weight: bold;">あなたの家の合言葉</label>
-        
+
         <div style="display: flex; gap: 8px; margin-bottom: 15px;">
-            <input type="text" id="sync-keyword" th:value="${hostName}" placeholder="未発行" readonly 
-                   style="flex: 1; background: #f8fafc; font-family: monospace; font-size: 1.1rem; letter-spacing: 1px; font-weight: bold; border: 2px solid #e2e8f0; text-align: center; border-radius: 12px; padding: 12px;">
-            <button type="button" onclick="copyKeyword()" style="padding: 0 15px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 12px; cursor: pointer; font-size: 1.2rem;">📋</button>
+            <input type="text" id="sync-keyword" th:value="${joinCode}" placeholder="未発行" readonly 
+       style="flex: 1; background: #f8fafc; font-family: monospace; font-size: 1.1rem; letter-spacing: 1px; font-weight: bold; border: 2px solid #e2e8f0; text-align: center; border-radius: 12px; padding: 12px;">
+            <button type="button" onclick="copyKeyword(this)" style="padding: 0 15px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 12px; cursor: pointer; font-size: 1.2rem;">📋</button>
         </div>
 
         <button type="button" onclick="shareToLine()" 
@@ -232,7 +233,7 @@
             <button type="button" onclick="generateStrongKeyword()" style="background: transparent; color: var(--primary-color); border: 1px solid var(--primary-color); padding: 10px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; cursor: pointer;">
                 ✨ 新しい合言葉を発行する
             </button>
-            
+
             <button type="button" onclick="showSyncQR()" style="background: #f1f5f9; color: #64748b; border: none; padding: 10px; border-radius: 12px; font-size: 0.8rem; cursor: pointer;">
                 🖼️ 対面ならQRコードを表示
             </button>
@@ -254,7 +255,13 @@
         <video id="video" style="width: 100%; border-radius: 12px;"></video>
         <button type="button" class="sync-btn" style="background: #ef4444; width: 100%;" onclick="stopCamera()">閉じる</button>
     </div>
-</section>
+<section style="margin-top: 20px; padding: 20px;">
+        <div style="margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 20px; text-align: center;">
+            <a href="/logout" style="color: #ef4444; text-decoration: none; font-size: 0.9rem; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                🚪 ログアウトしてアプリを閉じる
+            </a>
+        </div>
+    </section>
 </main>
 
 <script th:inline="javascript">
@@ -264,7 +271,7 @@
     // ページが読み込まれたら自動実行
     window.addEventListener('load', function() {
         const syncInput = document.getElementById('sync-keyword');
-        
+
         // 1. もしJava側にホスト名（合言葉）があるなら
         if (sessionHostName && sessionHostName !== '') {
             // 入力欄に自動セット
