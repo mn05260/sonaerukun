@@ -1,7 +1,6 @@
 package com.example.sonaerukun.Controller;
 
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // ★追加
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,20 +13,25 @@ import com.example.sonaerukun.model.User;
 import com.example.sonaerukun.repository.UserRepository;
 
 import java.util.Optional;
+
 import java.util.List; 
 
-@Controller
-public class Homecontroller {
 
-    @Autowired
-    private SonaeruLogic sonaeruLogic;
 
-    @Autowired
-    private UserRepository userRepository;
+    @Controller
+    public class Homecontroller {
 
-   
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    // 1. @Autowiredを消して、private finalに変える
+    private final SonaeruLogic sonaeruLogic;
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+
+    // 2. このコンストラクタを追加する
+    public Homecontroller(SonaeruLogic sonaeruLogic, UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+        this.sonaeruLogic = sonaeruLogic;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @GetMapping("/")
     public String index() {
@@ -63,25 +67,26 @@ public String login(@RequestParam String username, @RequestParam String password
     }
 }
 
-    @GetMapping("/index")
+  @GetMapping("/index")
 public String showIndex(HttpSession session, Model model) {
     String username = (String) session.getAttribute("userName");
     if (username == null) return "redirect:/"; 
+    
     User user = userRepository.findById(username).orElse(null);
     if (user == null) return "redirect:/";
     if (user.getJoinCode() == null || user.getJoinCode().isEmpty()) {
-        //  ここでランダムな10文字を作る（自作のメソッドを呼ぶか直接書く）
-        String newCode = java.util.UUID.randomUUID().toString().substring(0, 10);
+        String newCode = sonaeruLogic.generateFamilyCode(); 
         user.setJoinCode(newCode);
-        userRepository.save(user); // DBに永続保存！
+        userRepository.save(user); 
     }
+    
     String hostName = user.getHostName();
     List<User> members = userRepository.findByHostName(hostName);
     
     model.addAttribute("members", members);
     model.addAttribute("UserName", username);
     model.addAttribute("hostName", hostName);
-    model.addAttribute("joinCode", user.getJoinCode()); // ★HTML側に「保存されたコード」を渡す
+    model.addAttribute("joinCode", user.getJoinCode()); 
 
     return "index";
 }

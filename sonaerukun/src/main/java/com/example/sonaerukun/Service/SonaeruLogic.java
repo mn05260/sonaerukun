@@ -1,4 +1,6 @@
-package com.example.sonaerukun.Controller;
+package com.example.sonaerukun.Service;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,7 +15,15 @@ public class SonaeruLogic {
     // 引数に infantCount と seniorCount を追加
     public PreparednessResult calculate(String prefecture, int familyCount, int maleCount, int femaleCount, int childCount, int infantCount, int seniorCount, int days, String napkinLevel) {
     PreparednessResult result = new PreparednessResult();
+    familyCount = Math.max(0, familyCount);
+    maleCount = Math.max(0, maleCount);
+    femaleCount = Math.max(0, femaleCount);
+    childCount = Math.max(0, childCount);
+    infantCount = Math.max(0, infantCount);
+    seniorCount = Math.max(0, seniorCount);
+    days = Math.max(1, days); // 日数は最低1日にしておくのが安全
 
+    // --- 🌍 地域特性の判定ロジック --- (ここから下はそのまま)
     // --- 🌍 地域特性の判定ロジック ---
     String regionalItemsA = "";
     String regionalItemsB = "";
@@ -101,5 +111,9 @@ rankBBuilder.append(regionalItemsB);
     result.storageInfo = String.format("📦 備蓄スペースの目安：水（2L×6本入り）約%d箱、食料 約%d箱分", waterBoxes, foodBoxes);
 
     return result;
+}
+public String generateFamilyCode() {
+    // 10文字にする場合は substring(0, 10) に書き換えてください
+    return UUID.randomUUID().toString().substring(0,10).toUpperCase();
 }
 }
