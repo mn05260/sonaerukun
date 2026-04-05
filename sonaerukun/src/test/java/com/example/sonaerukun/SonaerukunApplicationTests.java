@@ -18,6 +18,9 @@ class SonaerukunApplicationTests {
     private SonaeruLogic sonaeruLogic; // Springにお願いしてLogicを持ってきてもらう
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+    // ... 既存の Autowired の近くに追加 ...
+    @org.springframework.beans.factory.annotation.Value("${firebase.api.key:MISSING}")
+    private String apiKey;
 
     @Test
     void contextLoads() {
@@ -109,4 +112,29 @@ void testPasswordEncryption() {
     // passwordEncoder.matches で正しく照合できるか確認
     assertTrue(passwordEncoder.matches(rawPassword, encodedPassword));
 }
+@Test
+    void testFirebaseApiKeySecurity() throws java.io.IOException {
+        // 1. 環境変数が正しくロードされているかチェック
+        assertNotEquals("MISSING", apiKey, "🚨 APIキーが環境変数から読み込めていません！.envファイルを確認してください。");
+        assertTrue(apiKey.startsWith("AIza"), "🚨 APIキーの形式が不正です（AIzaから始まっていません）。");
+
+        // 2. ソースコード（app.js）に生のキーが書き込まれていないかスキャン
+        // パスはあなたの環境に合わせて調整してください（通常は以下）
+        java.nio.file.Path appJsPath = java.nio.file.Path.of("src/main/resources/static/javascript/app.js");
+        
+        if (java.nio.file.Files.exists(appJsPath)) {
+            String content = java.nio.file.Files.readString(appJsPath);
+            // 「"AIza」という文字列がファイル内に直接書かれていたらアウト
+            assertFalse(content.contains("\"AIza"), "🚨 警告: app.js にAPIキーが直書きされています！");
+            System.out.println("✅ ソースコードのスキャン成功: 生のキーは見つかりませんでした。");
+        }
+    }
+
+    @Test
+    void testFinalSafetyCheck() {
+        // 履歴に残っていた「古いキー」が今の環境に使われていないか念のため確認
+        // (あなたが新しく発行したキーの冒頭数文字をここに入れる)
+        assertTrue(apiKey.contains("SyDjS"), "🚨 新しいキーが適用されていません！古いキーが残っている可能性があります。");
+        System.out.println("✅ 安全確認完了: 現在は新しいAPIキーが有効です。");
+    }
 }
