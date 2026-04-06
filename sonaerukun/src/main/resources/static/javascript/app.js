@@ -118,11 +118,22 @@ function saveAllData() {
     };
 
     const allData = { items, memo };
-    localStorage.setItem('sonaerukun_v3_data', JSON.stringify(allData));
+    const storageKey = 'sonaerukun_data_' + currentUserName; 
+    
+    // ブラウザ（LocalStorage）に保存
+    localStorage.setItem(storageKey, JSON.stringify(allData));
+
+    // Firebase（クラウド）にも保存（合言葉がある場合のみ）
     if (currentKeyword) {
         database.ref('users/' + currentKeyword).set(allData);
     }
 }
+
+    const allData = { items, memo };
+    localStorage.setItem('sonaerukun_v3_data', JSON.stringify(allData));
+    if (currentKeyword) {
+        database.ref('users/' + currentKeyword).set(allData);
+    }
 function generateStrongKeyword() {
     const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
     let result = "";
@@ -227,8 +238,14 @@ function copyKeyword() {
     }
 }
 window.onload = function() {
-    const local = JSON.parse(localStorage.getItem('sonaerukun_v3_data') || '{}');
+    // ⭐【修正1】自分専用の保存キーを作成
+    const storageKey = 'sonaerukun_data_' + currentUserName;
+    const keywordKey = 'sonaerukun_keyword_' + currentUserName;
+
+    // ⭐【修正2】自分専用のキーから備蓄品データを読み込む
+    const local = JSON.parse(localStorage.getItem(storageKey) || '{}');
     if (local.items || local.memo) reflectDataToUI(local);
+    
     const syncInput = document.getElementById('sync-keyword');
     
     // Javaの model.addAttribute("joinCode", ...) から届いた値
@@ -236,18 +253,21 @@ window.onload = function() {
 
     if (serverKeyword && serverKeyword !== '' && serverKeyword !== '未発行') {
         currentKeyword = serverKeyword;
-        localStorage.setItem('sonaerukun_keyword', serverKeyword);
+        // ⭐【修正3】合言葉もユーザーごとに保存
+        localStorage.setItem(keywordKey, serverKeyword);
         console.log("✅ DBから取得した合言葉で同期開始: " + serverKeyword);
     } else {
-        const localKeyword = localStorage.getItem('sonaerukun_keyword');
+        // ⭐【修正4】自分専用のキーから合言葉を復元
+        const localKeyword = localStorage.getItem(keywordKey);
         if (localKeyword) {
             currentKeyword = localKeyword;
             if (syncInput) syncInput.value = localKeyword;
         }
     }
+
     if (currentKeyword) {
         observeData(); 
-        showSyncQR(); // ついでにQRも出しちゃう
+        showSyncQR(); 
     }
 
     updateTotalCount();
